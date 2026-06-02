@@ -10,18 +10,20 @@
 ## Table of Contents
 
 1. [Context](#context)
-2. [Architecture](#architecture)
-3. [Risks](#risks)
-4. [Key Decisions](#key-decisions)
-5. [Repository Structure](#repository-structure)
-6. [WordPress Multisite Configuration](#wordpress-multisite-configuration)
-7. [Local Development](#local-development)
-8. [Theme Development](#theme-development)
-9. [Plugin Strategy](#plugin-strategy)
-10. [CI/CD Pipeline](#cicd-pipeline)
-11. [Integrations](#integrations)
-12. [Security](#security)
-13. [Open Decisions](#open-decisions)
+2. [Goals](#goals)
+3. [Architecture](#architecture)
+4. [Risks](#risks)
+5. [Key Decisions](#key-decisions)
+6. [Repository Structure](#repository-structure)
+7. [WordPress Multisite Configuration](#wordpress-multisite-configuration)
+8. [Local Development](#local-development)
+9. [Theme Development](#theme-development)
+10. [Plugin Strategy](#plugin-strategy)
+11. [CI/CD Pipeline](#cicd-pipeline)
+12. [Integrations](#integrations)
+13. [Security](#security)
+14. [Deferred Decisions](#deferred-decisions)
+15. [Risks Believed to not be an Issue](#nonissue-risks)
 
 ---
 
@@ -33,32 +35,27 @@ Background, problem statement, goals, and user tiers are in [`docs/multisite-pla
 
 ---
 
-## Architecture
+## Goals
 
-```
-                        ┌─────────────────────────────────────┐
-                        │              GKE Cluster             │
-                        │                                      │
-  Internet ──► GCP LB ──► WordPress Pods (N replicas, HPA)    │
-                        │         │                            │
-                        │         ▼                            │
-                        │   Cloud SQL (MySQL)                  │
-                        │                                      │
-                        └─────────────────────────────────────┘
-                                  │
-                                  ▼ media read/write
-                             GCS Bucket
-```
+The primary goal of Phase 1 is to get the WordPress multisite network running, stable, and deployable. Everything else builds on top of this.
+
+- Kubernetes infrastructure provisioned on GKE — cluster, Cloud SQL database, GCS media offload, ingress, SSL cert provisioning, and autoscaling
+- WordPress multisite network stood up with the three site types configured (riding sites, stub sites, specialty sites)
+- CI/CD pipeline running — every push to main builds and deploys to staging automatically
+
+Qomon forms integration and content syndication are out of Phase 1 scope — see [Risks](#risks) and [Deferred Decisions](#deferred-decisions).
+
+---
+
+## Architecture
 
 **Pods are stateless.** Every uploaded file goes directly to GCS via WP Offload Media — `wp-content/uploads` on the container is ephemeral. This is a hard constraint that flows through every plugin and theme decision in this doc.
 
-| Component          | Technology               | Notes                                                                                                |
-| ------------------ | ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| Runtime            | GKE Autopilot            | HPA handles short-campaign traffic surge; Google manages node provisioning and scaling automatically |
-| Database           | Cloud SQL — MySQL 8.x    | GCP-managed failover and backups                                                                     |
-| Media              | GCS via WP Offload Media | Pods never own uploads                                                                               |
-| Container registry | Artifact Registry        | Images are immutable at deploy time                                                                  |
-| Secrets            | Secret Manager           | Injected as env vars at pod start                                                                    |
+| Component | Technology               | Notes                                                                                                |
+| --------- | ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Runtime   | GKE Autopilot            | HPA handles short-campaign traffic surge; Google manages node provisioning and scaling automatically |
+| Database  | Cloud SQL — MySQL 8.x    | GCP-managed failover and backups                                                                     |
+| Media     | GCS via WP Offload Media | Pods never own uploads                                                                               |
 
 **WordPress core, plugins, and themes ship in the container image.** The WP admin updater is disabled. All updates go through CI/CD.
 
@@ -67,27 +64,6 @@ Background, problem statement, goals, and user tiers are in [`docs/multisite-pla
 ## Risks
 
 These are the areas most likely to cause scope growth, integration failure, or production incidents. Each has a mitigation strategy, but they need active attention — they are not solved by choosing the right library.
-
----
-
-### Qomon plugin fork scope
-
-**What:** The Qomon integration depends on a WordPress plugin currently being forked. The scope of that fork is not fully defined.
-
-**Why risky:** Fork scope tends to grow. A plugin that works for a single test form on one site may need significant additional work to be network-activated, correctly scoped per subsite, configurable per riding, and resilient to Qomon API outages. None of that is guaranteed by the existence of the fork.
-
-**Impact if it bites:** MVP blocked or shipped with reduced Qomon functionality. Pressure to scope-creep the integration mid-build.
-
-**Mitigation:** Before any other integration work begins, define the minimum required feature set for MVP in writing:
-
-- Which form types are needed at launch?
-- Does the plugin activate per-site or network-wide?
-- What is the expected behaviour if Qomon's API is unreachable?
-- What data, if any, writes back to WordPress?
-
-Treat everything outside that spec as out of scope until the fork proves it.
-
-**Cross-cutting impact:** Theme templates, onboarding flow, and CA documentation all depend on knowing what Qomon forms actually look like and how they're embedded. Don't design those until the plugin's output is known.
 
 ---
 
@@ -102,41 +78,6 @@ Treat everything outside that spec as out of scope until the fork proves it.
 **Mitigation:** Multisite compatibility is a required verification step before any plugin is confirmed for the stack — not an assumption. Test with multiple subsites active and verify: activation model (network vs. per-site), option scoping, and query behaviour. WP Offload Media is known-good in multisite and does not need re-verification.
 
 **Cross-cutting impact:** Plugin compatibility failures discovered late could require replacing a confirmed plugin mid-build, which cascades into theme work, templates, and integration tests.
-
----
-
-### WordPress upgrades across a large network
-
-**What:** Upgrading WordPress core or a plugin in a multisite network is not equivalent to upgrading a single site. Database upgrade routines run per-subsite. At 130+ sites, a partially-applied upgrade (failed mid-run) leaves the network in an inconsistent state that is difficult to recover from.
-
-**Why risky:** The immutable image model ensures the code upgrade is atomic, but the database upgrade is not. WP-CLI's `wp core update-db --network` runs per-site sequentially. A failure mid-run means some sites are on the new schema, some are not. WordPress does not have a rollback mechanism for DB upgrades.
-
-**Mitigation:**
-
-- The migration job (init container in CI/CD) must run `wp core update-db --network` and treat a non-zero exit code as a deploy failure — not a warning.
-- Test upgrade paths in staging with a full-size network before applying to production.
-- Take a Cloud SQL snapshot before every production upgrade. GCP-managed snapshots make this low-friction.
-
-**Cross-cutting impact:** Staging must mirror production's site count closely enough to catch upgrade timing and failure issues. A staging environment with 3 sites will not expose problems that appear at 50+.
-
----
-
-### Custom domain attachment per riding
-
-**What:** Each riding can have its own domain (e.g. `ottawawestgreens.ca` rather than `ottawawest.gpo.ca`). WordPress multisite domain mapping, DNS configuration, and SSL cert provisioning are all required for each custom domain, and each is a potential failure point.
-
-**Why risky:** This is a recurring operational workflow that will happen dozens of times, often under deadline pressure when a riding is launching. Cert provisioning via cert-manager is automatic once DNS is pointed correctly, but DNS propagation, mapping configuration in WP, and ingress rules must all align. A misconfiguration takes a riding site offline with no obvious error for the CA.
-
-**Mitigation:** Define and document the full domain onboarding runbook before the first custom domain goes live. The runbook should cover:
-
-1. DNS change the riding makes (A record / CNAME pointing to the cluster's ingress IP)
-2. WP-CLI command to add the domain mapping
-3. How to confirm cert provisioning completed
-4. How to verify the site resolves correctly
-
-Automate steps 2–4 where possible. This runbook is an operational dependency of the platform launch, not an afterthought.
-
-**Cross-cutting impact:** Riding onboarding documentation, CA support workflow, and the cert-manager/ingress configuration are all tied to this process being defined and reliable.
 
 ---
 
@@ -158,19 +99,45 @@ Automate steps 2–4 where possible. This runbook is an operational dependency o
 
 ---
 
-## Key Decisions
+### Qomon plugin fork scope
 
-Decisions that are confirmed, with rationale and cross-cutting impact noted where relevant.
+**What:** The Qomon integration depends on a WordPress plugin currently being forked. The scope of that fork is not fully defined, but it will only be an MVP.
+
+**Why risky:** Fork scope tends to grow. A plugin that works for a single test form on one site may need significant additional work to be network-activated, correctly scoped per subsite, configurable per riding, and resilient to Qomon API outages. None of that is guaranteed by the existence of the fork.
+
+**Impact if it bites:** MVP blocked or shipped with reduced Qomon functionality. Pressure to scope-creep the integration mid-build.
+
+**Mitigation:** Before any other integration work begins and after the multi-site is built, define the minimum required feature set for MVP in writing:
+
+- Which form types are needed at launch?
+- Does the plugin activate per-site or network-wide?
+- What data, if any, writes back to WordPress?
+
+Treat everything outside that spec as out of scope until the fork proves it.
+
+**Cross-cutting impact:** Theme templates, onboarding flow, and CA documentation all depend on knowing what Qomon forms actually look like and how they're embedded. Don't design those until the plugin's output is known.
 
 ---
 
-### GKE Autopilot as the Kubernetes runtime mode
+### WordPress upgrades across a large network
 
-**Decision:** Run the cluster on GKE Autopilot rather than Standard mode.
+**What:** Upgrading WordPress core or a plugin in a multisite network is not equivalent to upgrading a single site. Database upgrade routines run per-subsite. At 130+ sites, a partially-applied upgrade (failed mid-run) leaves the network in an inconsistent state that is difficult to recover from.
 
-**Rationale:** Autopilot has Google manage node provisioning, scaling, and patching automatically. Standard mode gives more control over the underlying server pool, but that control comes with ongoing operational overhead that isn't justified for a solo maintainer. Move to Standard only if specific scaling constraints arise that Autopilot cannot accommodate.
+**Why risky:** The immutable image model ensures the code upgrade is atomic, but the database upgrade is not. WP-CLI's `wp core update-db --network` runs per-site sequentially. A failure mid-run means some sites are on the new schema, some are not. WordPress does not have a rollback mechanism for DB upgrades.
 
-**Cross-cutting impact:** Pod resource requests must be explicitly set in deployment manifests — Autopilot enforces minimum resource requirements (250m CPU, 512 MiB memory per container) and will reject pods that don't specify them.
+**Mitigation:**
+
+- The migration job (init container in CI/CD) must run `wp core update-db --network` and treat a non-zero exit code as a deploy failure — not a warning.
+- Test upgrade paths in staging with a full-size network before applying to production.
+- Take a Cloud SQL snapshot before every production upgrade. GCP-managed snapshots make this low-friction.
+
+**Cross-cutting impact:** Staging must mirror production's site count closely enough to catch upgrade timing and failure issues. A staging environment with 3 sites will not expose problems that appear at 50+.
+
+---
+
+## Key Decisions
+
+Decisions that are confirmed, with rationale and cross-cutting impact noted where relevant.
 
 ---
 
@@ -184,23 +151,19 @@ Decisions that are confirmed, with rationale and cross-cutting impact noted wher
 
 ---
 
-### GCP IAP for WordPress admin panel access
+### Testing frameworks
 
-**Decision:** The WordPress admin panel (`/wp-admin`) is protected by GCP IAP (Identity-Aware Proxy) at the Kubernetes ingress level.
+**Decision:** Three layers, each testing a different concern:
 
-**Rationale:** IAP verifies a valid Google account before the request ever reaches WordPress — no IP allowlists to maintain as developers work from different locations, no extra passwords to manage. It's the cleanest fit for a Google Cloud-hosted deployment.
+| Layer         | Tool                                              | What it tests                                      |
+| ------------- | ------------------------------------------------- | -------------------------------------------------- |
+| Backend       | PHPUnit                                           | Plugin PHP logic, API endpoints, hooks             |
+| Frontend unit | Jest + @testing-library/react                     | Block components and JavaScript logic in isolation |
+| Browser       | Playwright + @wordpress/e2e-test-utils-playwright | Full user flows in a real browser                  |
 
-**Cross-cutting impact:** All developers and content editors need a Google account and the appropriate IAP access grant. This must be part of the onboarding process for every new team member or CA (candidate agent).
+**Rationale:** Each layer catches a different class of bug. PHPUnit and Jest run in milliseconds with no browser — fast feedback on logic errors. Playwright runs in a real browser and catches things that only break in a full user flow. Running them in order in CI (PHPUnit → Jest → Playwright) means the cheap tests fail fast and the slow tests only run when everything else passes.
 
----
-
-### Playwright for end-to-end browser testing
-
-**Decision:** Playwright is the end-to-end (E2E) browser testing framework.
-
-**Rationale:** Playwright has first-class TypeScript support and handles multi-page flows — like a Stripe payment redirect and return — cleanly out of the box. It's the natural fit for a TypeScript-heavy custom block development workflow.
-
-**Cross-cutting impact:** E2E tests run as a third stage in the CI/CD pipeline after unit tests. Minimum test cases at launch: a candidate agent logs in and publishes a post, a donation checkout completes in Stripe test mode, and a Qomon form submits successfully.
+**Cross-cutting impact:** All three run as sequential stages in the CI/CD (continuous integration/continuous deployment) pipeline. Minimum Playwright test cases at launch: a candidate agent (CA) logs in and publishes a post, a donation checkout completes in Stripe test mode, and a Qomon form submits successfully.
 
 ---
 
@@ -236,9 +199,9 @@ Decisions that are confirmed, with rationale and cross-cutting impact noted wher
 
 ### Subdomain and custom domain URL structure, no subdirectories
 
-**Decision:** Each riding gets its own domain. Subdomains of `gpo.ca` (e.g. `ottawawest.gpo.ca`) and fully custom domains (e.g. `ottawawestgreens.ca`) are both supported. Subdirectory mode is not used.
+**Decision:** Each riding gets its own domain. Subdomains of `gpo.ca` (e.g. `guelph.gpo.ca`) and fully custom domains (e.g. `guelphgreens.ca`) are both supported. Subdirectory mode is not used.
 
-**Rationale:** Subdirectory URLs (`gpo.ca/ottawawest`) are operationally simpler but produce weak per-riding brand identity. Custom domains per riding are standard for this type of network and WordPress multisite's built-in domain mapping (WP 4.5+) handles this without an additional plugin.
+**Rationale:** Subdirectory URLs (`gpo.ca/guelph`) are operationally simpler but produce weak per-riding brand identity. Custom domains per riding are standard for this type of network and WordPress multisite's built-in domain mapping (WP 4.5+) handles this without an additional plugin.
 
 **Cert strategy:**
 
@@ -266,26 +229,6 @@ Decisions that are confirmed, with rationale and cross-cutting impact noted wher
 **Rationale:** Operational simplicity — one network to maintain, one deployment pipeline. Specialty sites are explicitly excluded from riding syndication and governance at the application level.
 
 **Cross-cutting impact:** Specialty sites must be typed in the network and excluded from any network-wide riding operations (syndication, bulk updates, analytics rollups). This needs to be enforced in code, not by convention.
-
----
-
-### Syndication default: push-with-fork, live immediately
-
-**Decision:** _(Phase 2)_ When central pushes content to a riding site, it goes live immediately as a CA-owned copy. The CA can edit it. Changes to the central version do not propagate after the initial push.
-
-**Rationale:** Live-linked syndication (central changes auto-update all riding copies) is powerful but removes CA ownership of their site's content. Push-with-fork balances central reach with local control: central can move quickly, CAs can localise without asking permission.
-
-**Cross-cutting impact:** Phase 2 block library design must support forked copies as first-class objects. The theme needs to accommodate content that was pushed from central but may have been locally modified.
-
----
-
-### Issue taxonomy owned by central
-
-**Decision:** _(Phase 2)_ The issue tag taxonomy is defined and maintained by central (DComms). Tags are enforced at the template level — CAs cannot create new tags.
-
-**Rationale:** The analytics signal (which issues are resonating in which ridings) is only useful if tags are consistent across all riding sites. CA-defined tags break cross-site analysis entirely.
-
-**Cross-cutting impact:** DComms owns a content governance responsibility, not just a publishing one. The taxonomy must be defined before Phase 2 templates are built, since tags are enforced at the template level.
 
 ---
 
@@ -323,7 +266,7 @@ The network hosts three site types:
 
 | Type            | Examples                          | Syndication eligible | Notes                                                 |
 | --------------- | --------------------------------- | -------------------- | ----------------------------------------------------- |
-| Riding sites    | `ottawawestgreens.ca`             | Yes                  | CA-managed; target or development tier                |
+| Riding sites    | `guelphgreens.ca`             | Yes                  | CA-managed; target or development tier                |
 | Stub sites      | Auto-generated                    | No                   | No CMS users; minimal template                        |
 | Specialty sites | `1997.gpo.ca`, `islandgetaway.ca` | No                   | Same network; excluded from riding governance in code |
 
@@ -335,35 +278,9 @@ The network hosts three site types:
 
 ## Local Development
 
-**Stack: Bedrock + Docker Compose**
+**Stack: DDEV + Bedrock**
 
-Full local Kubernetes (minikube/kind) mirrors prod most faithfully but adds substantial overhead for day-to-day WordPress development. Docker Compose is sufficient for theme, plugin, and integration work. Reserve local k8s testing for infra and deployment changes.
-
-```yaml
-# docker-compose.yml (illustrative)
-services:
-  wordpress:
-    build: .
-    environment:
-      DB_HOST: db
-      DB_NAME: canopy
-      DB_USER: wp
-      DB_PASSWORD: wp
-      WP_ENV: development
-      WP_HOME: http://localhost:8080
-    ports:
-      - "8080:80"
-    volumes:
-      - ./web/app/themes:/var/www/html/web/app/themes
-      - ./web/app/plugins:/var/www/html/web/app/plugins
-  db:
-    image: mysql:8
-    environment:
-      MYSQL_DATABASE: canopy
-      MYSQL_USER: wp
-      MYSQL_PASSWORD: wp
-      MYSQL_ROOT_PASSWORD: root
-```
+DDEV is a Docker-based local development tool purpose-built for PHP projects including WordPress and Bedrock. It handles the web server, database, and PHP configuration automatically, and has first-class Bedrock and WordPress multisite support. Reserve local Kubernetes (minikube/kind) testing for infra and deployment changes only.
 
 **Local media storage:** A real `canopy-dev` GCS bucket. Local development behaviour matches production exactly — same API, same URLs, same edge cases. Each developer needs a GCS service account credential file stored in `.env`. No emulators.
 
@@ -407,7 +324,7 @@ services:
 | Meta Box                 | Custom fields, post types, taxonomies               | Composer — multisite compatibility TBD (see [Risks](#risks)) |
 | GiveWP + Stripe add-on   | Donations / payments                                | Composer — multisite compatibility TBD (see [Risks](#risks)) |
 | Qomon WP Plugin (forked) | Forms + Qomon integration                           | In-repo — scope TBD (see [Risks](#risks))                    |
-| `canopy` (custom)        | Custom Gutenberg blocks + custom REST API endpoints | In-repo — built by Director of Technology                    |
+| `canopy` (custom)        | Custom Gutenberg blocks + custom REST API endpoints | In-repo — built by the GPO                                   |
 
 **Custom plugin (`canopy`):**
 
@@ -439,16 +356,10 @@ push to main / PR merge
   │             │  docker build
   │             │  docker push → Artifact Registry
   └─────┬───────┘
-        ▼
-  ┌─────────────┐
-  │  Test       │  PHPUnit (unit + integration)
-  │             │  PHP_CodeSniffer (WPCS ruleset)
-  │             │  Playwright (end-to-end browser tests)
-  └─────┬───────┘
         │ main only
         ▼
   ┌─────────────┐
-  │  Deploy     │  kubectl set image / helm upgrade
+  │  Deploy     │  kubectl set image / helm upgrade → staging
   │             │  WP-CLI migration job runs first (init container)
   └─────────────┘
 ```
@@ -495,6 +406,67 @@ Centralised Stripe account — all donations across all riding sites flow throug
 
 ---
 
-## Open Decisions
+## Deferred Decisions
 
-No open decisions remain. All technical decisions have been resolved and are documented in [Key Decisions](#key-decisions) above.
+---
+
+### GKE Autopilot as the Kubernetes runtime mode
+
+**Decision:** Run the cluster on GKE Autopilot rather than Standard mode.
+
+**Rationale:** Autopilot has Google manage node provisioning, scaling, and patching automatically. Standard mode gives more control over the underlying server pool, but that control comes with ongoing operational overhead that isn't justified for a solo maintainer. Move to Standard only if specific scaling constraints arise that Autopilot cannot accommodate.
+
+**Cross-cutting impact:** Pod resource requests must be explicitly set in deployment manifests — Autopilot enforces minimum resource requirements (250m CPU, 512 MiB memory per container) and will reject pods that don't specify them.
+
+---
+
+### GCP IAP for WordPress admin panel access
+
+**Decision:** The WordPress admin panel (`/wp-admin`) is protected by GCP IAP (Identity-Aware Proxy) at the Kubernetes ingress level.
+
+**Rationale:** IAP verifies a valid Google account before the request ever reaches WordPress — no IP allowlists to maintain as developers work from different locations, no extra passwords to manage. It's the cleanest fit for a Google Cloud-hosted deployment.
+
+**Cross-cutting impact:** All developers and content editors need a Google account and the appropriate IAP access grant. This must be part of the onboarding process for every new team member or CA (candidate agent).
+
+---
+
+### Syndication default: push-with-fork, live immediately
+
+**Decision:** _(Phase 2)_ When central pushes content to a riding site, it goes live immediately as a CA-owned copy. The CA can edit it. Changes to the central version do not propagate after the initial push.
+
+**Rationale:** Live-linked syndication (central changes auto-update all riding copies) is powerful but removes CA ownership of their site's content. Push-with-fork balances central reach with local control: central can move quickly, CAs can localise without asking permission.
+
+**Cross-cutting impact:** Phase 2 block library design must support forked copies as first-class objects. The theme needs to accommodate content that was pushed from central but may have been locally modified.
+
+---
+
+### Issue taxonomy owned by central
+
+**Decision:** _(Phase 2)_ The issue tag taxonomy is defined and maintained by central (DComms). Tags are enforced at the template level — CAs cannot create new tags.
+
+**Rationale:** The analytics signal (which issues are resonating in which ridings) is only useful if tags are consistent across all riding sites. CA-defined tags break cross-site analysis entirely.
+
+**Cross-cutting impact:** DComms owns a content governance responsibility, not just a publishing one. The taxonomy must be defined before Phase 2 templates are built, since tags are enforced at the template level.
+
+---
+
+## Risks Believed to not be an Issue
+
+### Custom domain attachment per riding
+
+**What:** Each riding can have its own domain (e.g. `guelphgreens.ca` rather than `guelph.gpo.ca`). WordPress multisite domain mapping, DNS configuration, and SSL cert provisioning are all required for each custom domain, and each is a potential failure point.
+
+**Why risky:** This is a recurring operational workflow that will happen dozens of times, often under deadline pressure when a riding is launching. Cert provisioning via cert-manager is automatic once DNS is pointed correctly, but DNS propagation, mapping configuration in WP, and ingress rules must all align. A misconfiguration takes a riding site offline with no obvious error for the CA.
+
+**Mitigation:** Define and document the full domain onboarding runbook before the first custom domain goes live. The runbook should cover:
+
+1. DNS change the riding makes (A record / CNAME pointing to the cluster's ingress IP)
+2. WP-CLI command to add the domain mapping
+3. How to confirm cert provisioning completed
+4. How to verify the site resolves correctly
+
+Automate steps 2–4 where possible. This runbook is an operational dependency of the platform launch, not an afterthought.
+
+**Cross-cutting impact:** Riding onboarding documentation, CA support workflow, and the cert-manager/ingress configuration are all tied to this process being defined and reliable.
+
+---
