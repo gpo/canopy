@@ -1,4 +1,5 @@
 # GPO WordPress Multisite Platform
+
 **Status:** Draft — early scoping, 2027 project
 **Author:** Ian Edington, Director of Technology
 **Audience:** Comms team, executive, riding leads
@@ -80,26 +81,30 @@ These are the goals of the overall project. What ships in MVP vs. later phases i
 ## Users and Tiers
 
 ### Central comms team (DComms)
+
 Primary publisher for press releases, key messages, and main page content. Maintains the shared block library, monitors riding sites for brand consistency. Needs tools that are fast to use under campaign pressure and don't require chasing down riding leads for every update.
 
 ### Fundraising team
+
 Primary publisher for action campaigns — petitions, donation drives, volunteer sign-ups. Holds the same push-with-approval authority as DComms and publishes independently, without going through comms. Fundraising content has a different cadence and audience than comms content: it is typically time-bounded, conversion-focused, and needs to appear consistently across riding sites without being localised. The shared block library needs to serve both teams, and the two must be able to publish without stepping on each other.
 
 ### Riding leads by tier
 
-| Tier | Count | Capacity | Expected platform use |
-|------|-------|----------|----------------------|
-| Target | 3 | Paid staff | Full CMS, active publishing |
-| Development | 13 | Dedicated volunteers | Regular publishing, moderate autonomy |
-| Builder | ~30 | Variable volunteers | Opt-in, low-friction onboarding, may go quiet for weeks |
-| Paper candidate | ~78 | None | No CMS access; auto-generated stub only |
+| Tier            | Count | Capacity             | Expected platform use                                   |
+| --------------- | ----- | -------------------- | ------------------------------------------------------- |
+| Target          | 3     | Paid staff           | Full CMS, active publishing                             |
+| Development     | 13    | Dedicated volunteers | Regular publishing, moderate autonomy                   |
+| Builder         | ~30   | Variable volunteers  | Opt-in, low-friction onboarding, may go quiet for weeks |
+| Paper candidate | ~78   | None                 | No CMS access; auto-generated stub only                 |
 
 **A note on the tiers:** In practice, the line between "development" and "builder" ridings is soft. Volunteer capacity changes. The platform should treat these tiers as onboarding guides — what template and defaults you start with — not permission boundaries. A builder riding that gets a strong CA should be able to grow without waiting for a platform admin to unlock something.
 
 ### Specialty site editors
+
 Sites like `1997.gpo.ca` and `islandgetaway.ca` live in the same network but have different content norms and governance. These editors are not riding CAs and should not be in the same onboarding flow or content distribution chain.
 
 ### Platform admin
+
 The platform cannot require constant dev intervention for normal operations. If central comms needs an engineer to push an update, the design has failed.
 
 ---
@@ -123,11 +128,12 @@ The platform runs on Kubernetes (GKE) backed by a GCP-managed Cloud SQL instance
 One non-trivial consequence: WordPress is traditionally stateful. It writes uploaded media to disk, and in a multi-replica deployment, all pods need to read from the same filesystem. The standard k8s approach for WordPress is to offload media to object storage — in this case, GCS — using a plugin (e.g., WP Offload Media). This means uploaded files never live on the pod; they go straight to a GCS bucket and are served from there. It is the right architecture for a scaled deployment, but it is a meaningful departure from default WordPress behaviour and needs to be accounted for in theme and plugin development.
 
 Implications for development:
+
 - Plugins that assume local filesystem access for media will not work correctly and must be avoided or patched
 - The `wp-content/uploads` directory on the pod should be treated as ephemeral
 - Deployment pipelines need to manage WordPress core, plugins, and themes as immutable container images — not via the WP admin updater
 
-### Content distribution *(Phase 2)*
+### Content distribution _(Phase 2)_
 
 Several ideas are on the table. Rather than list them all, here is a synthesised recommendation and the trade-offs.
 
@@ -143,7 +149,7 @@ This model is a middle path. Pure push (central controls everything) kills CA ow
 
 **Content calendar visibility** is a low-cost, high-trust add: CAs see what central is planning to publish in the next few weeks. No extra permissions, no new workflow. It reduces the chance of a CA publishing something that undercuts a central announcement they didn't know was coming.
 
-### Analytics and local issue signal *(Phase 2)*
+### Analytics and local issue signal _(Phase 2)_
 
 Previous attempts at surfacing local issue resonance have relied on CAs actively reporting upward — what voters are asking about at the door, what topics are generating interest. That model has consistently failed because it adds work to volunteers who are already stretched.
 
@@ -155,7 +161,7 @@ The one remaining dependency is process: someone at central needs to look at the
 
 **Requirements this creates:** consistent issue tagging across all riding sites. If a CA publishes a housing page without tagging it, it's invisible to cross-site analysis. This needs to be enforced at the template level, not left to CA discretion.
 
-### Paper-candidate stubs *(Phase 3)*
+### Paper-candidate stubs _(Phase 3)_
 
 For the ~78 ridings with no active CAs, the platform auto-generates minimal landing pages: candidate name, riding name, a brief GPO message, and a contact form that routes to central. No subsite is created in WP for these — they are static or near-static pages generated from a central database.
 
@@ -163,7 +169,7 @@ The goal is purely discoverability: someone searching for the Green candidate in
 
 Explicit non-goal: CA editing. If a paper-candidate riding gets an active CA, they get a real subsite onboarded through the normal process. The stub doesn't need to grow.
 
-### French language support *(Phase 3)*
+### French language support _(Phase 3)_
 
 French is a hard requirement. Several ridings in the Ottawa area and Northern Ontario are Francophone or bilingual, and a candidate without a French-language presence in those ridings is not competitive.
 
@@ -172,14 +178,14 @@ Two implementation paths, both with real costs:
 **Option A: Per-subsite language assignment**
 Each subsite is a single language. A bilingual riding (e.g., Glengarry-Prescott-Russell) gets two subsites — one English, one French — sharing a CA. The shared block library needs French-language versions of each block.
 
-*Pros:* Simpler to implement and maintain. No multilingual plugin dependencies. French content is first-class, not a translation layer.
-*Cons:* Double the subsites in bilingual ridings. CA manages two sites. Central maintains two versions of every shared block.
+_Pros:_ Simpler to implement and maintain. No multilingual plugin dependencies. French content is first-class, not a translation layer.
+_Cons:_ Double the subsites in bilingual ridings. CA manages two sites. Central maintains two versions of every shared block.
 
 **Option B: Multilingual plugin (WPML or Polylang)**
 Each subsite supports multiple languages via a plugin. The CA publishes in one language, translates in the other (or uses machine translation with review).
 
-*Pros:* One subsite per riding regardless of language. Cleaner URL structure if desired.
-*Cons:* WPML and Polylang both add significant complexity and maintenance overhead. Performance implications in multisite. One more thing to break. For a single maintainer, this is a meaningful operational burden.
+_Pros:_ One subsite per riding regardless of language. Cleaner URL structure if desired.
+_Cons:_ WPML and Polylang both add significant complexity and maintenance overhead. Performance implications in multisite. One more thing to break. For a single maintainer, this is a meaningful operational burden.
 
 This doc leans toward **Option A** but treats it as an open decision. See Key Decisions.
 
@@ -195,14 +201,14 @@ This approach keeps the codebase simple and avoids a situation where a riding ca
 
 These are the choices that require stakeholder input before scoping can be completed. Each one has a suggested owner and needs a decision before the project can move into detailed design.
 
-| # | Decision | Options | Owner | Status | Dev Recommendation |
-|---|----------|---------|-------|--------|--------------------|
-| 1 | Specialty sites in the same multisite network as riding sites? | Same network (current preference) vs. separate installs sharing codebase | Director of Technology + exec | Open | Same network |
-| 2 | Default syndication behaviour: live-linked or forked? | Live-linked by default (central controls until CA forks) vs. forked by default (CA controls, central is a starting point) | DComms + riding leads | Open | Push-with-fork — central pushes content, goes live immediately as a CA-owned copy. Central changes do not propagate after the initial push. |
-| 3 | Paper-candidate stubs: build or skip? | Build static stubs (~78 ridings) vs. accept absence for paper-candidate ridings | Exec + Director of Technology | Open | Build |
-| 4 | French strategy: per-subsite language vs. multilingual plugin | Option A (two subsites for bilingual ridings) vs. Option B (WPML/Polylang) | Director of Technology + bilingual riding leads | Open | Defer to Phase 3 |
-| 5 | Issue taxonomy: who owns it and how is it enforced? | Central defines tags, enforced at template level vs. CA-defined tags vs. hybrid | DComms + Director of Technology | Open | Central defines and enforces at template level |
-| 6 | Central review rights on riding content | Does central have publish/unpublish rights on riding sites? Or advisory only? | Exec + comms | Open | Yes — central should have publish/unpublish rights |
+| #   | Decision                                                       | Options                                                                                                                   | Owner                                           | Status | Dev Recommendation                                                                                                            |
+| --- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Specialty sites in the same multisite network as riding sites? | Same network (current preference) vs. separate installs sharing codebase                                                  | Director of Technology + exec                   | Open   | Same network                                                                                                                  |
+| 2   | Default syndication behaviour: live-linked or forked?          | Live-linked by default (central controls until CA forks) vs. forked by default (CA controls, central is a starting point) | DComms + riding leads                           | Open   | Push-with-fork — central pushes content, per-site control whether to go live immediately as a CA-owned copy. Defer to Phase 2 |
+| 3   | Paper-candidate stubs: build or skip?                          | Build static stubs (~78 ridings) vs. accept absence for paper-candidate ridings                                           | Exec + Director of Technology                   | Open   | Build - Defer to Phase 3                                                                                                      |
+| 4   | French strategy: per-subsite language vs. multilingual plugin  | Option A (two subsites for bilingual ridings) vs. Option B (WPML/Polylang)                                                | Director of Technology + bilingual riding leads | Open   | Defer to Phase 3                                                                                                              |
+| 5   | Issue taxonomy: who owns it and how is it enforced?            | Central defines tags, enforced at template level vs. CA-defined tags vs. hybrid                                           | DComms + Director of Technology                 | Open   | Central defines and enforces at template level                                                                                |
+| 6   | Central review rights on riding content                        | Does central have publish/unpublish rights on riding sites? Or advisory only?                                             | Exec + comms                                    | Open   | Yes — central should have publish/unpublish rights                                                                            |
 
 Decision 6 is the politically charged one. "Can central unpublish something a CA published?" is a question about trust and authority, not just technology. The platform can support either model, but it needs to be decided before build starts, because the answer affects how CAs relate to the platform and each other.
 
@@ -242,10 +248,12 @@ The platform can surface which issues are resonating in which ridings, but someo
 ## Out of Scope and Future Work
 
 **Explicitly out of scope for this design:**
+
 - Comms framework and CA handbook (DComms' work)
 - Accessibility audit (required before launch, scoped separately)
 
 **Deferred to Phase 2 or later:**
+
 - Content sharing between sites (shared block library, syndication, push-with-approval)
 - Content calendar visibility
 - Analytics and local issue signal
@@ -263,27 +271,27 @@ This phasing is indicative. Dates will be set once key decisions are made and th
 
 ### MVP — before long campaign ramp-up
 
-The MVP ships a functional, integrated riding site platform. Content distribution features are deliberately excluded to keep scope manageable; riding sites need to work reliably before they need to be coordinated.
+The MVP delivers a running, stable, deployable multisite network. Riding site templates and content features are deliberately excluded — the network needs to be solid before anything is built on top of it.
 
 - Multisite network stood up on GKE with Cloud SQL and GCS media offload
-- Riding site templates for target and development ridings
-- Qomon forms integration (volunteer sign-ups, canvassing, local engagement)
 - Stripe payments integration (donations and fundraising on riding sites)
-- Fundraising pages as a standard part of every riding site template
 
 ### Phase 2 — mid long campaign
 
-- Central shared block library: key messages, policy planks, CTA blocks
-- Content syndication with local fork
-- Push-with-approval for DComms and Fundraising
-- Content calendar visibility (read-only for CAs)
+- Qomon forms integration (volunteer sign-ups, canvassing, local engagement)
+- Riding site templates for target and development ridings
+- Fundraising pages as a standard part of every riding site template
 - Analytics setup: GA4 network property, issue taxonomy enforced at template level, central dashboard
 - Builder riding onboarding (self-serve, guided)
 
 ### Phase 3 — post-campaign or next cycle
 
+- Central shared block library: key messages, policy planks, CTA blocks
+- Content syndication with local fork
+- Push-with-approval for DComms and Fundraising
+- Content calendar visibility (read-only for CAs)
+- Fork-to-localise workflow refinement based on Phase 2 feedback
 - French language support
 - Paper-candidate stubs for ~78 inactive ridings
 - Specialty site templates (1997.gpo.ca, islandgetaway.ca), pending exec decision on network model
-- Fork-to-localise workflow refinement based on Phase 2 feedback
 - Accessibility audit and remediation
