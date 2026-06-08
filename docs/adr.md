@@ -171,11 +171,11 @@ FSE is still maturing and has documented rough edges with complex multisite layo
 
 **Stack:**
 
-| Layer         | Technology                | Role                                                               |
-| ------------- | ------------------------- | ------------------------------------------------------------------ |
-| Styling       | Tailwind CSS              | Utility-first CSS; shared between theme templates and block styles |
-| Block editor  | Gutenberg (custom blocks) | All content components built as custom blocks                      |
-| Custom fields | Meta Box                  | Structured content fields, custom post types, custom taxonomies    |
+| Layer | Technology | Role |
+| --- | --- | --- |
+| Styling | Tailwind CSS | Utility-first CSS; shared between theme templates and block styles |
+| Block editor | Gutenberg (custom blocks) | All content components built as custom blocks |
+| Custom fields | Meta Box | Structured content fields, custom post types, custom taxonomies |
 
 **Consequences:**
 
@@ -204,9 +204,9 @@ The project has three distinct types of code to test: PHP backend logic, JavaScr
 
 **Chosen option: PHPUnit + Jest.**
 
-| Layer         | Tool                          | What it tests                                      |
-| ------------- | ----------------------------- | -------------------------------------------------- |
-| Backend       | PHPUnit                       | Plugin PHP logic, API endpoints, hooks             |
+| Layer | Tool | What it tests |
+| --- | --- | --- |
+| Backend | PHPUnit | Plugin PHP logic, API endpoints, hooks |
 | Frontend unit | Jest + @testing-library/react | Block components and JavaScript logic in isolation |
 
 Each layer catches a different class of bug. PHPUnit and Jest run in milliseconds — fast feedback on logic errors. Browser-level end-to-end testing is deferred to a later phase.

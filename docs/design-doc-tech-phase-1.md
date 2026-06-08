@@ -51,11 +51,11 @@ Qomon forms integration and content syndication are out of Phase 1 scope — see
 
 **Pods are stateless.** Every uploaded file goes directly to GCS via WP Offload Media — `wp-content/uploads` on the container is ephemeral. This is a hard constraint that flows through every plugin and theme decision in this doc.
 
-| Component | Technology               | Notes                                                                                                |
-| --------- | ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| Runtime   | GKE Autopilot            | HPA handles short-campaign traffic surge; Google manages node provisioning and scaling automatically |
-| Database  | Cloud SQL — MySQL 8.x    | GCP-managed failover and backups                                                                     |
-| Media     | GCS via WP Offload Media | Pods never own uploads                                                                               |
+| Component | Technology | Notes |
+| --- | --- | --- |
+| Runtime | GKE Autopilot | HPA handles short-campaign traffic surge; Google manages node provisioning and scaling automatically |
+| Database | Cloud SQL — MySQL 8.x | GCP-managed failover and backups |
+| Media | GCS via WP Offload Media | Pods never own uploads |
 
 **WordPress core, plugins, and themes ship in the container image.** The WP admin updater is disabled. All updates go through CI/CD.
 
@@ -155,9 +155,9 @@ Decisions that are confirmed, with rationale and cross-cutting impact noted wher
 
 **Decision:** Three layers, each testing a different concern:
 
-| Layer         | Tool                          | What it tests                                      |
-| ------------- | ----------------------------- | -------------------------------------------------- |
-| Backend       | PHPUnit                       | Plugin PHP logic, API endpoints, hooks             |
+| Layer | Tool | What it tests |
+| --- | --- | --- |
+| Backend | PHPUnit | Plugin PHP logic, API endpoints, hooks |
 | Frontend unit | Jest + @testing-library/react | Block components and JavaScript logic in isolation |
 
 **Rationale:** Each layer catches a different class of bug. PHPUnit and Jest run in milliseconds with no browser — fast feedback on logic errors. Running them in order in CI (PHPUnit → Jest) means the cheap tests fail fast. Browser-level end-to-end testing is deferred to a later phase.
@@ -263,11 +263,11 @@ canopy/
 
 The network hosts three site types:
 
-| Type            | Examples                          | Syndication eligible | Notes                                                 |
-| --------------- | --------------------------------- | -------------------- | ----------------------------------------------------- |
-| Riding sites    | `guelphgreens.ca`             | Yes                  | CA-managed; target or development tier                |
-| Stub sites      | Auto-generated                    | No                   | No CMS users; minimal template                        |
-| Specialty sites | `1997.gpo.ca`, `islandgetaway.ca` | No                   | Same network; excluded from riding governance in code |
+| Type | Examples | Syndication eligible | Notes |
+| --- | --- | --- | --- |
+| Riding sites | `guelphgreens.ca` | Yes | CA-managed; target or development tier |
+| Stub sites | Auto-generated | No | No CMS users; minimal template |
+| Specialty sites | `1997.gpo.ca`, `islandgetaway.ca` | No | Same network; excluded from riding governance in code |
 
 **Domain mapping** is handled via WordPress multisite's built-in mapping (WP 4.5+). No additional plugin required.
 
@@ -293,11 +293,11 @@ DDEV is a Docker-based local development tool purpose-built for PHP projects inc
 
 **Stack:**
 
-| Layer         | Technology                | Role                                                               |
-| ------------- | ------------------------- | ------------------------------------------------------------------ |
-| Styling       | Tailwind CSS              | Utility-first CSS; shared between theme templates and block styles |
-| Block editor  | Gutenberg (custom blocks) | All content components built as custom blocks                      |
-| Custom fields | Meta Box                  | Structured content fields, custom post types, custom taxonomies    |
+| Layer | Technology | Role |
+| --- | --- | --- |
+| Styling | Tailwind CSS | Utility-first CSS; shared between theme templates and block styles |
+| Block editor | Gutenberg (custom blocks) | All content components built as custom blocks |
+| Custom fields | Meta Box | Structured content fields, custom post types, custom taxonomies |
 
 **Why hybrid over FSE:** FSE is still maturing and has documented rough edges with complex multisite layouts and locked templates. Hybrid gives full control over templates today while keeping the block editor as the primary CA content interface — which is what Phase 2 block library work requires.
 
@@ -316,14 +316,14 @@ DDEV is a Docker-based local development tool purpose-built for PHP projects inc
 
 **Confirmed MVP plugins:**
 
-| Plugin                   | Purpose                                             | Source                                                       |
-| ------------------------ | --------------------------------------------------- | ------------------------------------------------------------ |
-| WP Offload Media         | GCS media offload                                   | Composer (Delicious Brains) — multisite verified             |
-| WP-CLI                   | Automation, migrations, seed scripts                | Included in image                                            |
-| Meta Box                 | Custom fields, post types, taxonomies               | Composer — multisite compatibility TBD (see [Risks](#risks)) |
-| GiveWP + Stripe add-on   | Donations / payments                                | Composer — multisite compatibility TBD (see [Risks](#risks)) |
-| Qomon WP Plugin (forked) | Forms + Qomon integration                           | In-repo — scope TBD (see [Risks](#risks))                    |
-| `canopy` (custom)        | Custom Gutenberg blocks + custom REST API endpoints | In-repo — built by the GPO                                   |
+| Plugin | Purpose | Source |
+| --- | --- | --- |
+| WP Offload Media | GCS media offload | Composer (Delicious Brains) — multisite verified |
+| WP-CLI | Automation, migrations, seed scripts | Included in image |
+| Meta Box | Custom fields, post types, taxonomies | Composer — multisite compatibility TBD (see [Risks](#risks)) |
+| GiveWP + Stripe add-on | Donations / payments | Composer — multisite compatibility TBD (see [Risks](#risks)) |
+| Qomon WP Plugin (forked) | Forms + Qomon integration | In-repo — scope TBD (see [Risks](#risks)) |
+| `canopy` (custom) | Custom Gutenberg blocks + custom REST API endpoints | In-repo — built by the GPO |
 
 **Custom plugin (`canopy`):**
 

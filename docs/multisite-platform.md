@@ -90,12 +90,12 @@ Primary publisher for action campaigns — petitions, donation drives, volunteer
 
 ### Riding leads by tier
 
-| Tier            | Count | Capacity             | Expected platform use                                   |
-| --------------- | ----- | -------------------- | ------------------------------------------------------- |
-| Target          | 3     | Paid staff           | Full CMS, active publishing                             |
-| Development     | 13    | Dedicated volunteers | Regular publishing, moderate autonomy                   |
-| Builder         | ~30   | Variable volunteers  | Opt-in, low-friction onboarding, may go quiet for weeks |
-| Paper candidate | ~78   | None                 | No CMS access; auto-generated stub only                 |
+| Tier | Count | Capacity | Expected platform use |
+| --- | --- | --- | --- |
+| Target | 3 | Paid staff | Full CMS, active publishing |
+| Development | 13 | Dedicated volunteers | Regular publishing, moderate autonomy |
+| Builder | ~30 | Variable volunteers | Opt-in, low-friction onboarding, may go quiet for weeks |
+| Paper candidate | ~78 | None | No CMS access; auto-generated stub only |
 
 **A note on the tiers:** In practice, the line between "development" and "builder" ridings is soft. Volunteer capacity changes. The platform should treat these tiers as onboarding guides — what template and defaults you start with — not permission boundaries. A builder riding that gets a strong CA should be able to grow without waiting for a platform admin to unlock something.
 
@@ -201,14 +201,14 @@ This approach keeps the codebase simple and avoids a situation where a riding ca
 
 These are the choices that require stakeholder input before scoping can be completed. Each one has a suggested owner and needs a decision before the project can move into detailed design.
 
-| #   | Decision                                                       | Options                                                                                                                   | Owner                                           | Status | Dev Recommendation                                                                                                            |
-| --- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Specialty sites in the same multisite network as riding sites? | Same network (current preference) vs. separate installs sharing codebase                                                  | Director of Technology + exec                   | Open   | Same network                                                                                                                  |
-| 2   | Default syndication behaviour: live-linked or forked?          | Live-linked by default (central controls until CA forks) vs. forked by default (CA controls, central is a starting point) | DComms + riding leads                           | Open   | Push-with-fork — central pushes content, per-site control whether to go live immediately as a CA-owned copy. Defer to Phase 2 |
-| 3   | Paper-candidate stubs: build or skip?                          | Build static stubs (~78 ridings) vs. accept absence for paper-candidate ridings                                           | Exec + Director of Technology                   | Open   | Build - Defer to Phase 3                                                                                                      |
-| 4   | French strategy: per-subsite language vs. multilingual plugin  | Option A (two subsites for bilingual ridings) vs. Option B (WPML/Polylang)                                                | Director of Technology + bilingual riding leads | Open   | Defer to Phase 3                                                                                                              |
-| 5   | Issue taxonomy: who owns it and how is it enforced?            | Central defines tags, enforced at template level vs. CA-defined tags vs. hybrid                                           | DComms + Director of Technology                 | Open   | Central defines and enforces at template level                                                                                |
-| 6   | Central review rights on riding content                        | Does central have publish/unpublish rights on riding sites? Or advisory only?                                             | Exec + comms                                    | Open   | Yes — central should have publish/unpublish rights                                                                            |
+| # | Decision | Options | Owner | Status | Dev Recommendation |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Specialty sites in the same multisite network as riding sites? | Same network (current preference) vs. separate installs sharing codebase | Director of Technology + exec | Open | Same network |
+| 2 | Default syndication behaviour: live-linked or forked? | Live-linked by default (central controls until CA forks) vs. forked by default (CA controls, central is a starting point) | DComms + riding leads | Open | Push-with-fork — central pushes content, per-site control whether to go live immediately as a CA-owned copy. Defer to Phase 2 |
+| 3 | Paper-candidate stubs: build or skip? | Build static stubs (~78 ridings) vs. accept absence for paper-candidate ridings | Exec + Director of Technology | Open | Build - Defer to Phase 3 |
+| 4 | French strategy: per-subsite language vs. multilingual plugin | Option A (two subsites for bilingual ridings) vs. Option B (WPML/Polylang) | Director of Technology + bilingual riding leads | Open | Defer to Phase 3 |
+| 5 | Issue taxonomy: who owns it and how is it enforced? | Central defines tags, enforced at template level vs. CA-defined tags vs. hybrid | DComms + Director of Technology | Open | Central defines and enforces at template level |
+| 6 | Central review rights on riding content | Does central have publish/unpublish rights on riding sites? Or advisory only? | Exec + comms | Open | Yes — central should have publish/unpublish rights |
 
 Decision 6 is the politically charged one. "Can central unpublish something a CA published?" is a question about trust and authority, not just technology. The platform can support either model, but it needs to be decided before build starts, because the answer affects how CAs relate to the platform and each other.
 
