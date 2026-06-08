@@ -345,10 +345,12 @@ Separating this from the theme keeps block logic portable and independently test
 
 ## CI/CD Pipeline
 
-**Tooling:** GitHub Actions
+**Tooling:** GitHub Actions — two separate workflow files, both watching `main`.
+
+**Staging pipeline** — triggered automatically on merge to `main`:
 
 ```
-push to main / PR merge
+merge to main
         │
         ▼
   ┌─────────────┐
@@ -356,17 +358,32 @@ push to main / PR merge
   │             │  docker build
   │             │  docker push → Artifact Registry
   └─────┬───────┘
-        │ main only
         ▼
   ┌─────────────┐
-  │  Deploy     │  kubectl set image / helm upgrade → staging
+  │  Deploy     │  kubectl set image / helm upgrade → staging cluster
+  │             │  WP-CLI migration job runs first (init container)
+  └─────────────┘
+```
+
+**Production pipeline** — triggered manually after reviewing staging:
+
+```
+manual trigger (workflow_dispatch)
+        │
+        ▼
+  ┌─────────────┐
+  │  Build      │  composer install --no-dev
+  │             │  docker build
+  │             │  docker push → Artifact Registry
+  └─────┬───────┘
+        ▼
+  ┌─────────────┐
+  │  Deploy     │  kubectl set image / helm upgrade → production cluster
   │             │  WP-CLI migration job runs first (init container)
   └─────────────┘
 ```
 
 **Database migrations** run as a Kubernetes init container before new pods start. The migration job runs `wp core update-db --network` and any custom `dbDelta()` calls via WP-CLI. A non-zero exit code is a deploy failure — not a warning. See [Upgrades risk](#wordpress-upgrades-across-a-large-network).
-
-**Environment promotion:** `main` → staging automatically. Production requires manual approval in the Actions workflow.
 
 **Staging environment:** Separate GKE cluster from production. Full isolation — a runaway staging workload cannot affect production, and infrastructure-level changes (autoscaler thresholds, node configuration) can be tested without risk. Staging must mirror production's site count closely enough to catch upgrade failures at scale — seed it with at least 20–30 subsites before running any upgrade tests.
 

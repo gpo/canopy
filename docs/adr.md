@@ -72,13 +72,13 @@ A staging environment is required to test changes before they reach production. 
 
 ### Decision Outcome
 
-**Chosen option: Separate GKE cluster.**
+**Chosen option: Separate GKE cluster with separate CI/CD pipelines.**
 
-A shared namespace means a runaway staging workload can compete for cluster resources with production. A separate cluster gives full isolation and allows infrastructure-level changes — autoscaler thresholds, ingress configuration — to be tested without any risk to production. The platform will eventually need this setup anyway; starting there avoids a disruptive migration mid-project.
+A shared namespace means a runaway staging workload can compete for cluster resources with production. A separate cluster gives full isolation and allows infrastructure-level changes — autoscaler thresholds, ingress configuration — to be tested without any risk to production. Staging and production each have their own GitHub Actions workflow file. Staging deploys automatically on merge to `main`. Production is triggered manually via `workflow_dispatch` after the developer has reviewed staging. There is no automatic promotion between environments.
 
 **Consequences:**
 
-- The CI/CD pipeline must target two clusters
+- Two GitHub Actions workflow files — staging auto-triggers on merge to `main`, production is manually triggered
 - Staging must be seeded with at least 20–30 subsites to meaningfully catch upgrade failures at scale — a staging network with 3 sites will not surface problems that appear at 50+
 - Additional cluster running cost; see cost analysis in `docs/design-doc-tech-phase-1.md`
 
