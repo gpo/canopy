@@ -179,9 +179,9 @@ FSE is still maturing and has documented rough edges with complex multisite layo
 
 **Consequences:**
 
-- Custom blocks live in the `canopy` plugin, not the theme — block logic is portable and independently testable
+- Custom blocks live in a dedicated blocks plugin (name TBD), not the theme — blocks are the core product CAs use to build their sites and should be portable and independently testable
 - Tailwind's output must be scoped to avoid collisions with wp-admin styles
-- Block styling changes require a coordinated update to both the plugin (block markup) and the theme (Tailwind config) if design tokens change
+- Block styling changes require a coordinated update to both the blocks plugin (block markup) and the theme (Tailwind config) if design tokens change
 
 ---
 
