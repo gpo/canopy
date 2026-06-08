@@ -235,6 +235,9 @@ Either option adds meaningful scope. Option A (two subsites per bilingual riding
 **Shared block library and paper-candidate stubs together are a significant initial investment.**
 Both are the right things to build. Both require meaningful custom development. For a single maintainer, doing both in the same MVP phase is aggressive. Stubs could ship after the riding network if the timeline gets tight.
 
+**Custom domain SSL certificates may not scale beyond ~15 domains.**
+We currently use cert-manager in DNS01 mode (Let's Encrypt) to provision SSL certificates. For custom riding domains (e.g. `donvalleywestgreens.ca`), this means the riding's DNS provider must support programmatic API access so cert-manager can add the required TXT record — both at initial issuance and at every renewal (~90 days). Some DNS providers don't expose an API, and some riding leads may be unwilling to grant us that access. The alternative (HTTP01 solver) avoids this but has its own complications. Additionally, Google Cloud Load Balancers have a hard cap of 15 SSL certificates in our current configuration. Supporting dozens of custom-domain ridings will require evaluating alternative certificate or load balancer strategies before we approach that limit. Not urgent while the cluster is small, but should be addressed before custom domain onboarding scales.
+
 **Short-campaign traffic surge.**
 The k8s/GKE architecture handles this through horizontal autoscaling — additional pods spin up under load without manual intervention. Cloud SQL scales independently. This is a solved problem at the infrastructure level, but it requires load testing before the short campaign begins to validate that autoscaling thresholds are configured correctly and that GCS media offload holds up under concurrent requests.
 
