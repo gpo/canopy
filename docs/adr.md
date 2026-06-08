@@ -198,26 +198,22 @@ The project has three distinct types of code to test: PHP backend logic, JavaScr
 ### Considered Options
 
 - **PHPUnit only** — covers PHP but not JavaScript or browser flows
-- **Playwright only** — covers browser flows but is too slow and heavy for unit-level feedback on PHP or JavaScript logic
-- **PHPUnit + Jest + Playwright** — each layer tests what it is best suited for
+- **PHPUnit + Jest** — each layer tests what it is best suited for
 
 ### Decision Outcome
 
-**Chosen option: PHPUnit + Jest + Playwright.**
+**Chosen option: PHPUnit + Jest.**
 
-| Layer         | Tool                                              | What it tests                                      |
-| ------------- | ------------------------------------------------- | -------------------------------------------------- |
-| Backend       | PHPUnit                                           | Plugin PHP logic, API endpoints, hooks             |
-| Frontend unit | Jest + @testing-library/react                     | Block components and JavaScript logic in isolation |
-| Browser       | Playwright + @wordpress/e2e-test-utils-playwright | Full user flows in a real browser                  |
+| Layer         | Tool                          | What it tests                                      |
+| ------------- | ----------------------------- | -------------------------------------------------- |
+| Backend       | PHPUnit                       | Plugin PHP logic, API endpoints, hooks             |
+| Frontend unit | Jest + @testing-library/react | Block components and JavaScript logic in isolation |
 
-Each layer catches a different class of bug. PHPUnit and Jest run in milliseconds — fast feedback on logic errors. Playwright runs in a real browser and catches things that only break in a full user flow.
+Each layer catches a different class of bug. PHPUnit and Jest run in milliseconds — fast feedback on logic errors. Browser-level end-to-end testing is deferred to a later phase.
 
 **Consequences:**
 
-- Tests run in order: PHPUnit → Jest → Playwright — cheap tests fail fast, slow tests only run when everything else passes
-- Playwright requires browser binaries to be downloaded in the CI environment (`npx playwright install`)
-- Playwright requires a running WordPress instance; the CI workflow must spin up the Docker environment before Playwright runs
+- Tests run in order: PHPUnit → Jest — cheap tests fail fast
 
 ---
 

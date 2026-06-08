@@ -155,15 +155,14 @@ Decisions that are confirmed, with rationale and cross-cutting impact noted wher
 
 **Decision:** Three layers, each testing a different concern:
 
-| Layer         | Tool                                              | What it tests                                      |
-| ------------- | ------------------------------------------------- | -------------------------------------------------- |
-| Backend       | PHPUnit                                           | Plugin PHP logic, API endpoints, hooks             |
-| Frontend unit | Jest + @testing-library/react                     | Block components and JavaScript logic in isolation |
-| Browser       | Playwright + @wordpress/e2e-test-utils-playwright | Full user flows in a real browser                  |
+| Layer         | Tool                          | What it tests                                      |
+| ------------- | ----------------------------- | -------------------------------------------------- |
+| Backend       | PHPUnit                       | Plugin PHP logic, API endpoints, hooks             |
+| Frontend unit | Jest + @testing-library/react | Block components and JavaScript logic in isolation |
 
-**Rationale:** Each layer catches a different class of bug. PHPUnit and Jest run in milliseconds with no browser — fast feedback on logic errors. Playwright runs in a real browser and catches things that only break in a full user flow. Running them in order in CI (PHPUnit → Jest → Playwright) means the cheap tests fail fast and the slow tests only run when everything else passes.
+**Rationale:** Each layer catches a different class of bug. PHPUnit and Jest run in milliseconds with no browser — fast feedback on logic errors. Running them in order in CI (PHPUnit → Jest) means the cheap tests fail fast. Browser-level end-to-end testing is deferred to a later phase.
 
-**Cross-cutting impact:** All three run as sequential stages in the CI/CD (continuous integration/continuous deployment) pipeline. Minimum Playwright test cases at launch: a candidate agent (CA) logs in and publishes a post, a donation checkout completes in Stripe test mode, and a Qomon form submits successfully.
+**Cross-cutting impact:** Both run as sequential stages in the CI/CD pipeline.
 
 ---
 
