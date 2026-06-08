@@ -52,6 +52,7 @@ Bedrock manages WordPress core and all plugins as Composer dependencies, enforce
 - All third-party plugins must be available as Composer packages (most are via WPackagist) or vendored in-repo
 - Plugins that are only installable via the WP admin are incompatible with this stack
 - The WP admin updater is disabled in production — all updates ship through CI/CD
+- Dependabot (or equivalent) should be enabled to open automated PRs for Composer dependency updates, including WordPress core and WPackagist plugins
 
 ---
 
