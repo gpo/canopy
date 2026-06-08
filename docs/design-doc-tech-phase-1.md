@@ -280,7 +280,7 @@ The network hosts three site types:
 
 **Stack: DDEV + Bedrock**
 
-DDEV is a Docker-based local development tool purpose-built for PHP projects including WordPress and Bedrock. It handles the web server, database, and PHP configuration automatically, and has first-class Bedrock and WordPress multisite support. Reserve local Kubernetes (minikube/kind) testing for infra and deployment changes only.
+DDEV is a Docker-based local development tool purpose-built for PHP projects including WordPress and Bedrock. It handles the web server, database, and PHP configuration automatically, and has first-class Bedrock and WordPress multisite support. Local Kubernetes is not used — infra and deployment changes are tested against the remote cluster directly.
 
 **Local media storage:** A real `canopy-dev` GCS bucket. Local development behaviour matches production exactly — same API, same URLs, same edge cases. Each developer needs a GCS service account credential file stored in `.env`. No emulators.
 
