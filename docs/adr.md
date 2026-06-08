@@ -29,7 +29,7 @@
 
 **Status:** accepted
 **Date:** 2026-05-26
-**Decision makers: Tech Team**
+**Decision makers: Ian Edington and Mark Wong**
 
 ### Context and Problem Statement
 
@@ -59,7 +59,7 @@ Bedrock manages WordPress core and all plugins as Composer dependencies, enforce
 
 **Status:** accepted
 **Date:** 2026-05-26
-**Decision makers: Tech Team**
+**Decision makers: Ian Edington and Mark Wong**
 
 ### Context and Problem Statement
 
@@ -88,7 +88,7 @@ A shared namespace means a runaway staging workload can compete for cluster reso
 
 **Status:** accepted
 **Date:** 2026-05-26
-**Decision makers: Tech Team**
+**Decision makers: Ian Edington and Mark Wong**
 
 ### Context and Problem Statement
 
@@ -122,7 +122,7 @@ Subdirectory URLs produce weak per-riding brand identity. Subdomain and custom d
 
 **Status:** accepted
 **Date:** 2026-05-26
-**Decision makers: Tech Team**
+**Decision makers: Ian Edington and Mark Wong**
 
 ### Context and Problem Statement
 
@@ -150,7 +150,7 @@ One network to maintain, one deployment pipeline. Operational simplicity outweig
 
 **Status:** accepted
 **Date:** 2026-05-26
-**Decision makers: Tech Team**
+**Decision makers: Ian Edington and Mark Wong**
 
 ### Context and Problem Statement
 
@@ -188,7 +188,7 @@ FSE is still maturing and has documented rough edges with complex multisite layo
 
 **Status:** accepted
 **Date:** 2026-05-26
-**Decision makers: Tech Team**
+**Decision makers: Ian Edington and Mark Wong**
 
 ### Context and Problem Statement
 
@@ -224,7 +224,7 @@ Each layer catches a different class of bug. PHPUnit and Jest run in millisecond
 
 **Status:** accepted
 **Date:** 2026-05-26
-**Decision makers: Tech Team**
+**Decision makers: Ian Edington and Mark Wong**
 
 ### Context and Problem Statement
 
