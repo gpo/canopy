@@ -1,0 +1,27 @@
+# Credentials & environment
+.env
+.env.local
+web/wp-config.php
+web/wp-config-ddev.php
+
+# WordPress uploads — media is served from GCS in all environments
+web/wp-content/uploads/
+
+# WordPress generated files
+web/wp-content/upgrade/
+web/wp-content/cache/
+web/wp-content/advanced-cache.php
+web/wp-content/object-cache.php
+web/wp-content/wp-cache-config.php
+
+# Dependencies
+vendor/
+node_modules/
+
+# OS & editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
