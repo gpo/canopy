@@ -22,6 +22,7 @@
     "wp-theme/twentytwentyfive": "^1.0"
   },
   "require-dev": {
+    "brain/monkey": "^2.7",
     "laravel/pint": "^1.0",
     "pestphp/pest": "^4.0"
   },
