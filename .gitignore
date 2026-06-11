@@ -1,22 +1,32 @@
 # Credentials & environment
 .env
-.env.local
-web/wp-config.php
+.env.*
+!.env.example
 web/wp-config-ddev.php
 
-# WordPress uploads
-web/wp-content/uploads/
+# WordPress core — installed via Composer
+web/wp
+web/.htaccess
 
-# WordPress generated files
-web/wp-content/upgrade/
-web/wp-content/cache/
-web/wp-content/advanced-cache.php
-web/wp-content/object-cache.php
-web/wp-content/wp-cache-config.php
+# Application — plugins and themes are Composer-managed
+web/app/plugins/*
+!web/app/plugins/.gitkeep
+web/app/mu-plugins/*/
+web/app/themes/twentytwentyfive/
+web/app/upgrade
+web/app/uploads/*
+!web/app/uploads/.gitkeep
+web/app/cache/*
+
+# Media is served from GCS in all non-local environments
 
 # Dependencies
-vendor/
+/vendor
+auth.json
 node_modules/
+
+# Logs
+*.log
 
 # OS & editor
 .DS_Store
