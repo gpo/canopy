@@ -1,6 +1,6 @@
 #Link to DDEV documentation: https://docs.ddev.com/en/stable/users/
 name: canopy
-type: wordpress
+type: wp-bedrock
 docroot: web
 php_version: "8.4"
 additional_hostnames: []
