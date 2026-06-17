@@ -4,7 +4,7 @@
 web/wp-config.php
 web/wp-config-ddev.php
 
-# WordPress uploads — media is served from GCS in all environments
+# WordPress uploads
 web/wp-content/uploads/
 
 # WordPress generated files
