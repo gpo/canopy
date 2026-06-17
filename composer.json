@@ -3,6 +3,9 @@
   "type": "project",
   "license": "AGPLv3",
   "description": "GPO WordPress multisite network",
+  "keywords": [
+    "bedrock", "composer", "roots", "wordpress-composer", "wordpress", "wp-composer", "wp-config", "wp"
+  ],
   "repositories": [
     {
       "name": "wp-packages",
