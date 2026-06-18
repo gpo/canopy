@@ -1,0 +1,9 @@
+#Link to DDEV documentation: https://docs.ddev.com/en/stable/users/
+name: canopy
+type: wordpress
+docroot: web
+php_version: "8.4"
+additional_hostnames: []
+database:
+    type: mysql
+    version: "8.4"
