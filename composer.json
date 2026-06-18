@@ -1,7 +1,7 @@
 {
   "name": "gpo/canopy",
   "type": "project",
-  "license": "MIT",
+  "license": "AGPLv3",
   "description": "GPO WordPress multisite network",
   "repositories": [
     {
