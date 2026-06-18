@@ -11,6 +11,7 @@
 git clone <repo-url>
 cd canopy
 ddev start
+ddev composer install
 ```
 
 The site will be available at `https://canopy.ddev.site`.
