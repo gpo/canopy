@@ -127,6 +127,13 @@ if (env('DATABASE_URL')) {
 }
 
 /**
+* Qomon Plugin
+*/
+Config::define('QOMON_API_KEY', env('QOMON_API_KEY'));
+Config::define('QOMON_ORG_ID', env('QOMON_ORG_ID'));
+
+
+/**
  * Authentication Unique Keys and Salts
  */
 Config::define('AUTH_KEY', env('AUTH_KEY'));
