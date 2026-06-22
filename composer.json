@@ -3,6 +3,9 @@
   "type": "project",
   "license": "AGPLv3",
   "description": "GPO WordPress multisite network",
+  "keywords": [
+    "bedrock", "composer", "roots", "wordpress-composer", "wordpress", "wp-composer", "wp-config", "wp"
+  ],
   "repositories": [
     {
       "name": "wp-packages",
@@ -22,6 +25,8 @@
     "wp-theme/twentytwentyfive": "^1.0"
   },
   "require-dev": {
+    "antecedent/patchwork": "^2.2",
+    "brain/monkey": "^2.7",
     "laravel/pint": "^1.0",
     "pestphp/pest": "^4.0"
   },
