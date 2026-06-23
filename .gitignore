@@ -11,6 +11,7 @@ web/.htaccess
 # Application — plugins and themes are Composer-managed
 web/app/plugins/*
 !web/app/plugins/.gitkeep
+!web/app/plugins/qomon-wp-plugin/
 web/app/mu-plugins/*/
 web/app/themes/twentytwentyfive/
 web/app/upgrade
