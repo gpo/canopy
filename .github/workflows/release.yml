@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build & Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install
+      - run: pnpm build
+
+      - name: Package plugin zip
+        run: |
+          mkdir -p dist/qomon
+          cp qomon.php dist/qomon/
+          cp readme.txt dist/qomon/
+          cp composer.json dist/qomon/
+          cp -r build dist/qomon/
+          cp -r public dist/qomon/
+          cp -r languages dist/qomon/
+          cd dist && zip -r ../qomon.zip qomon/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: qomon.zip
+          generate_release_notes: true

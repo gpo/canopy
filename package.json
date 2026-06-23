@@ -1,0 +1,40 @@
+{
+	"name": "qomon",
+	"version": "2.1.0",
+	"description": "Qomon plugin.",
+	"author": "Qomon",
+	"license": "GPL-2.0-or-later",
+	"main": "build/index.js",
+	"scripts": {
+		"build": "wp-scripts build",
+		"format": "wp-scripts format",
+		"lint:css": "wp-scripts lint-style",
+		"lint:js": "wp-scripts lint-js",
+		"packages-update": "wp-scripts packages-update",
+		"plugin-zip": "wp-scripts plugin-zip",
+		"start": "wp-scripts start",
+		"i18n": "wp i18n make-pot . languages/qomon.pot",
+		"test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/qomon-wp-plugin phpunit",
+		"test:js": "wp-scripts test-unit-js",
+		"test:js:watch": "wp-scripts test-unit-js --watch",
+		"lint:php": "composer exec -- phpcs",
+		"lint:php:fix": "composer exec -- phpcbf",
+		"prepare": "husky"
+	},
+	"dependencies": {
+		"@wordpress/components": "^23.7.0"
+	},
+	"devDependencies": {
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^16.3.2",
+		"@testing-library/user-event": "^14.6.1",
+		"@wordpress/block-editor": "^12.0.0",
+		"@wordpress/scripts": "^26.3.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.4.0"
+	},
+	"lint-staged": {
+		"*.php": "composer exec -- phpcs",
+		"*.js": "wp-scripts lint-js"
+	}
+}

@@ -1,0 +1,54 @@
+image: registry.gitlab.com/quorumsco/dev-ops/docker-images/frontend-team/docker:20.10.21
+
+stages:
+    - build
+    - upload
+
+services:
+    - docker:20.10.21-dind
+
+build:
+    stage: build
+
+    rules:
+        - when: manual
+
+    script:
+        - pnpm install
+        - pnpm build
+        - pnpm plugin-zip
+    artifacts:
+        paths:
+            - ./qomon.zip
+        expire_in: 1 week
+
+upload:
+    stage: upload
+
+    rules:
+        - if: $CI_COMMIT_REF_NAME == 'feat/ci'
+          variables:
+              DOPPLER_TOKEN: $DOPPLER_TOKEN_PROD
+
+    variables:
+        DOPPLER_TOKEN: $DOPPLER_TOKEN_INTE
+
+    before_script:
+        # Retrieve plugin version from qomon.php header
+        - export PLUGIN_VERSION=$(awk ' /(Version:)/{print $3}' qomon.php)
+        # Retrieve variables from doppler according env
+        - apk add --no-cache curl gnupg
+        - curl -Ls --tlsv1.2 --proto "=https" --retry 3 https://cli.doppler.com/install.sh | sh
+        - export BUCKET_NAME=$(doppler secrets get BUCKET_NAME --plain)
+        - export AWS_ACCESS_KEY_ID=$(doppler secrets get AWS_ACCESS_KEY_ID --plain)
+        - export AWS_SECRET_ACCESS_KEY=$(doppler secrets get AWS_SECRET_ACCESS_KEY --plain)
+        # Setup aws with credentials
+        - apk add --no-cache curl jq python3 py3-pip
+        - pip install awscli
+        - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+        - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+        - aws configure set region fr-par
+
+    script:
+        - aws --endpoint-url https://s3.fr-par.scw.cloud s3 cp ./qomon.zip s3://$BUCKET_NAME/download/qomon.zip --metadata-directive REPLACE --acl public-read --cache-control no-cache
+        - aws --endpoint-url https://s3.fr-par.scw.cloud s3 cp ./qomon.zip s3://$BUCKET_NAME/download/v$PLUGIN_VERSION/qomon.zip --metadata-directive REPLACE --acl public-read --cache-control no-cache

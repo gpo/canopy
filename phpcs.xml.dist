@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<ruleset name="Qomon Plugin">
+	<description>WordPress coding standards for the Qomon plugin.</description>
+
+	<file>./qomon.php</file>
+	<file>./tests/php</file>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<arg value="sp"/>
+
+	<rule ref="WordPress">
+		<!-- Allow short array syntax -->
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
+		<!-- Not enforcing Yoda conditions on existing code -->
+		<exclude name="WordPress.PHP.YodaConditions"/>
+		<!-- Allow short ternary -->
+		<exclude name="Universal.Operators.DisallowShortTernary"/>
+	</rule>
+
+	<config name="minimum_supported_wp_version" value="6.1"/>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="qomon"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Script URLs contain manifest-derived cache-busting hashes, version param not needed -->
+	<rule ref="WordPress.WP.EnqueuedResourceParameters.MissingVersion">
+		<severity>0</severity>
+	</rule>
+
+	<!-- error_log is intentional for CDN failure warnings -->
+	<rule ref="WordPress.PHP.DevelopmentFunctions.error_log_error_log">
+		<severity>0</severity>
+	</rule>
+
+	<!-- base64_encode is used for inline SVG menu icon, not obfuscation -->
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode">
+		<severity>0</severity>
+	</rule>
+
+	<!-- wp_redirect is fine for admin-post.php handler -->
+	<rule ref="WordPress.Security.SafeRedirect.wp_redirect_wp_redirect">
+		<severity>0</severity>
+	</rule>
+
+	<!-- Test files: relax docblock, file comment, and string concat requirements -->
+	<rule ref="Squiz.Commenting.FunctionComment.Missing">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FileComment">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.ClassComment.Missing">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.VariableComment.Missing">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Strings.UnnecessaryStringConcat.Found">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.EnqueuedResources">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.NamingConventions.ValidHookName">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.EscapeOutput">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+</ruleset>

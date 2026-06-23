@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "create-block/qomon-form",
+  "version": "1.0.0",
+  "title": "Qomon Form",
+  "category": "embed",
+  "icon": "text",
+  "description": "Qomon form block scaffolded with Create Block tool.",
+  "supports": {
+    "html": false
+  },
+  "textdomain": "qomon",
+  "editorScript": "file:./qomon-form-block/index.js",
+  "attributes": {
+    "base_id": {
+      "type": "string"
+    },
+    "form_type": {
+      "type": "string",
+      "default": ""
+    },
+    "env": {
+      "type": "string",
+      "default": null
+    }
+  }
+}
