@@ -1,0 +1,74 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  lint-and-js:
+    name: Lint & JS Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          tools: composer
+
+      - run: pnpm install
+      - run: composer install --no-interaction
+
+      - name: JS lint
+        run: pnpm lint:js
+
+      - name: PHP lint
+        run: pnpm lint:php
+
+      - name: JS tests
+        run: pnpm test:js
+
+  php:
+    name: PHP Tests
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          tools: composer, phpunit
+          extensions: mysqli
+
+      - run: composer install --no-interaction
+
+      - name: Install WP test suite
+        run: |
+          bash <(curl -s https://raw.githubusercontent.com/wp-cli/scaffold-command/main/templates/install-wp-tests.sh) wordpress_test root root 127.0.0.1 latest true
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit
