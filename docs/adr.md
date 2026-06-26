@@ -17,6 +17,8 @@
 - [ADR-006 — Three-layer testing framework](#adr-006--three-layer-testing-framework)
 - [ADR-007 — DDEV for local development](#adr-007--ddev-for-local-development)
 
+- [ADR-011 — Sage as the base WordPress theme](#adr-011--sage-as-the-base-wordpress-theme)
+
 **TBD**
 
 - [ADR-008 — GKE Autopilot as the Kubernetes runtime](#adr-008--gke-autopilot-as-the-kubernetes-runtime)
@@ -243,6 +245,55 @@ DDEV handles the web server, database, and PHP configuration automatically and i
 
 - Local Kubernetes is not used; infrastructure and deployment-specific changes are tested against the remote cluster directly
 - A `bin/setup-local.sh` script is needed to automate first-run multisite setup (network creation, subsite creation, seed content import) on top of DDEV
+
+---
+
+## ADR-011 — Sage as the base WordPress theme
+
+**Status:** accepted
+**Date:** 2026-06-26
+**Decision makers: Mark Wong**
+
+### Context and Problem Statement
+
+ADR-005 established a hybrid theme with Tailwind CSS. A base starter theme is needed as the foundation — one that gives main theme developers unrestricted CSS freedom (complex components, transform animations, custom Gutenberg blocks) and allows sub-sites to consume the custom blocks those developers build.
+
+### Considered Options
+
+- **Sage (Roots.io)** — classic PHP + Laravel Blade templates, Vite, Tailwind CSS; part of the Roots/Bedrock ecosystem
+- **Underscores (_s)** — Automattic's canonical blank-canvas starter; no build toolchain
+- **FSE themes (Frost, Twenty Twenty-Five, Blockbase)** — Full Site Editing block themes driven by `theme.json`
+- **Framework themes (Astra, Kadence)** — lightweight parent themes with large plugin ecosystems
+- **Faust.js** — headless WordPress with a Next.js front end
+- **Tonik** — Tailwind + Webpack WordPress starter
+
+### Decision Outcome
+
+**Chosen option: Sage.**
+
+Sage is already the natural companion to Bedrock (ADR-001) — both are Roots projects designed to work together. It ships Vite + Tailwind v4 preconfigured and uses Laravel Blade templates, giving developers full styling freedom without fighting a pre-existing CSS layer. Custom Gutenberg blocks registered in the parent Sage theme (or the companion blocks plugin established in ADR-005) are available to all child themes on the network, satisfying the sub-site consumption requirement.
+
+Underscores was a strong alternative as a blank canvas, but it receives infrequent updates and ships no build toolchain — the Vite + Tailwind configuration Sage already provides would need to be built from scratch.
+
+**Consequences:**
+
+- Developers must learn Laravel Blade templating; standard PHP template conventions do not apply inside Sage
+- The Acorn package (Laravel IoC container for WordPress) is an additional managed dependency
+- Child themes for individual sub-site variants override only the templates and CSS tokens they need; the block library is inherited from the parent
+
+### Why the other options were rejected
+
+**FSE themes (Frost, Twenty Twenty-Five, Blockbase)**
+`theme.json` and Tailwind's utility classes compete for the same design tokens. In FSE, global styles are controlled through `theme.json` and the block editor's global styles UI — any Tailwind utility that touches typography, spacing, or colour must either be duplicated in `theme.json` or will conflict with what the editor generates. Complex layout components (combo-boxes, image overlays with transform animations) require writing CSS that works around the block editor's wrapper markup and style injection, rather than freely composing utilities.
+
+**Astra and Kadence**
+Both ship a substantial base CSS layer that loads on every page. Tailwind's preflight reset and utility classes produce specificity conflicts with this existing CSS. Developers end up writing `!important` overrides or fighting cascade order rather than building components cleanly. Neither theme is designed to have its base styles stripped or bypassed.
+
+**Faust.js**
+A headless architecture moves rendering to a separate Next.js application — custom Gutenberg blocks built in WordPress do not transfer to sub-sites through the standard block registration mechanism. Sub-sites would need their own front-end deployments, adding significant operational and hosting complexity that is out of scope for this project.
+
+**Tonik**
+Tonik satisfies the Tailwind freedom requirement but uses a Webpack build pipeline, which is a generation behind Vite in developer experience (hot module replacement speed, configuration simplicity, ecosystem momentum). Its community is small, documentation is sparse, and there is no established pattern for the parent-to-child-theme block inheritance this project requires.
 
 ---
 
