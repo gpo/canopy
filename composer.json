@@ -11,11 +11,16 @@
       "name": "wp-packages",
       "type": "composer",
       "url": "https://repo.wp-packages.org"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/gpo/qomon-wp-plugin"
     }
   ],
   "require": {
     "php": ">=8.3",
     "composer/installers": "^2.0",
+    "gpo/qomon-wp-plugin": "dev-master",
     "oscarotero/env": "^2.0",
     "roots/bedrock-autoloader": "^1.0",
     "roots/bedrock-disallow-indexing": "^2.0",
