@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4ed5b5ea596d5651ceff2188f7ba6a57",
+    "content-hash": "7fa6abcd9c53b48d2702863fd82b317b",
     "packages": [
         {
             "name": "composer/installers",
@@ -151,6 +151,39 @@
                 }
             ],
             "time": "2024-06-24T20:46:46+00:00"
+        },
+        {
+            "name": "gpo/qomon-wp-plugin",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:gpo/qomon-wp-plugin.git",
+                "reference": "d397280e38c5ff5b3eddd0947501c5fb4d5e4a49"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/gpo/qomon-wp-plugin/zipball/d397280e38c5ff5b3eddd0947501c5fb4d5e4a49",
+                "reference": "d397280e38c5ff5b3eddd0947501c5fb4d5e4a49",
+                "shasum": ""
+            },
+            "require": {
+                "composer/installers": "^1.0 || ^2.0",
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+                "phpcsstandards/phpcsutils": "^1.0",
+                "squizlabs/php_codesniffer": "^3.7",
+                "wp-coding-standards/wpcs": "^3.0",
+                "yoast/phpunit-polyfills": "^2.0"
+            },
+            "default-branch": true,
+            "type": "wordpress-plugin",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "Qomon forms for WordPress with server-side manifest caching",
+            "time": "2026-03-23T18:54:35+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -5353,12 +5386,14 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "gpo/qomon-wp-plugin": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.3"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }
