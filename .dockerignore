@@ -1,0 +1,30 @@
+# Credentials & environment
+.env
+.env.*
+!.env.example
+auth.json
+
+# WordPress core and Composer-managed plugins/themes
+vendor/
+web/wp
+web/.htaccess
+web/app/plugins/*
+!web/app/plugins/.gitkeep
+web/app/mu-plugins/*/
+web/app/themes/twentytwentyfive/
+web/app/upgrade
+web/app/uploads/*
+!web/app/uploads/.gitkeep
+web/app/cache/*
+
+# Local dev / VCS / CI
+.git
+.ddev
+.github
+tests
+docs
+node_modules
+*.log
+.DS_Store
+.idea
+.vscode
