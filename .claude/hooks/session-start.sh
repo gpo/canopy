@@ -30,5 +30,48 @@ else
   echo "!! claude-vendor-cache branch not found - run the 'Build vendor cache for cloud agent sessions' workflow once on the default branch. Pest/Pint unavailable until then."
 fi
 
+# --- Local WordPress runtime -------------------------------------------
+# No Docker/DDEV in the sandbox, so run the stack natively: MariaDB via
+# apt, wp-cli via phar, PHP's built-in server via `wp server`. Multisite
+# setup (this network's real topology) is left to the agent per task:
+#   wp core multisite-install --url=http://127.0.0.1:8080 ... --allow-root
+echo "==> provisioning MariaDB"
+if ! command -v mariadbd >/dev/null 2>&1 && ! command -v mysqld >/dev/null 2>&1; then
+  apt-get update -qq >/dev/null 2>&1
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq mariadb-server >/dev/null 2>&1 \
+    || echo "!! mariadb install failed - WordPress cannot run this session"
+fi
+if command -v mysqld_safe >/dev/null 2>&1; then
+  mkdir -p /run/mysqld && chown mysql:mysql /run/mysqld
+  if ! mariadb -e "SELECT 1" >/dev/null 2>&1; then
+    mysqld_safe >/dev/null 2>&1 &
+    for _ in $(seq 1 30); do mariadb -e "SELECT 1" >/dev/null 2>&1 && break; sleep 1; done
+  fi
+  mariadb -e "CREATE DATABASE IF NOT EXISTS canopy;
+              CREATE USER IF NOT EXISTS 'canopy'@'localhost' IDENTIFIED BY 'canopy';
+              GRANT ALL ON canopy.* TO 'canopy'@'localhost';" \
+    && echo "==> MariaDB running, database 'canopy' ready" \
+    || echo "!! could not create database"
+fi
+
+if ! command -v wp >/dev/null 2>&1; then
+  echo "==> installing wp-cli"
+  curl -fsSL --max-time 60 -o /usr/local/bin/wp \
+    https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+    && chmod +x /usr/local/bin/wp || echo "!! wp-cli download failed"
+fi
+
+if [ ! -f .env ] && [ -f .env.example ]; then
+  echo "==> writing sandbox .env"
+  sed -e "s|^DB_NAME=.*|DB_NAME='canopy'|" \
+      -e "s|^DB_USER=.*|DB_USER='canopy'|" \
+      -e "s|^DB_PASSWORD=.*|DB_PASSWORD='canopy'|" \
+      -e "s|^WP_HOME=.*|WP_HOME='http://127.0.0.1:8080'|" \
+      .env.example > .env
+  for key in AUTH_KEY SECURE_AUTH_KEY LOGGED_IN_KEY NONCE_KEY AUTH_SALT SECURE_AUTH_SALT LOGGED_IN_SALT NONCE_SALT; do
+    sed -i "s|^${key}=.*|${key}='$(head -c 32 /dev/urandom | base64 | tr -d "=+/'")'|" .env
+  done
+fi
+
 echo "==> session-start hook complete"
 echo "    Run checks with: vendor/bin/pint --test && vendor/bin/pest"
