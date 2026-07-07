@@ -42,6 +42,16 @@ Network, riding site templates (target + development tiers), Qomon, Stripe. Cont
 
 Hard requirement, deferred to Phase 3. See `docs/multisite-platform.md` for strategy options.
 
+## Verification
+
+- Lint: `vendor/bin/pint --test` (fix with `vendor/bin/pint`)
+- Tests: `vendor/bin/pest` (`tests/Unit`, `tests/Integration`; see `phpunit.xml`)
+- Run both before pushing.
+
+## Cloud agent sessions (Claude Code on the web)
+
+`.claude/hooks/session-start.sh` provisions the sandbox. `composer install` does not work there (GitHub dist downloads are blocked by the session proxy); the hook instead extracts the composer output from the `claude-vendor-cache` orphan branch, built by `.github/workflows/build-vendor-cache.yml` whenever `composer.lock` changes on the default branch.
+
 ## Key Documents
 
 - [`docs/multisite-platform.md`](docs/multisite-platform.md) — design doc

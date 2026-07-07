@@ -1,0 +1,74 @@
+name: "Build vendor cache for cloud agent sessions"
+
+# Claude Code cloud sandboxes cannot run `composer install`: the session
+# proxy scopes GitHub access to this repo, so dist zipballs from
+# api.github.com/codeload 403. CI has full network, so it builds the
+# composer output once and force-pushes it as a chunked tarball to the
+# orphan branch `claude-vendor-cache`, which sandboxes CAN fetch because it
+# lives in this repo. The session-start hook
+# (.claude/hooks/session-start.sh) extracts it.
+#
+# Requires the GPPACKAGIST_PAT secret (a token that can read
+# gpo/qomon-wp-plugin, pulled in as a VCS repository).
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - composer.json
+      - composer.lock
+      - .github/workflows/build-vendor-cache.yml
+  workflow_dispatch:
+
+env:
+  COMPOSER_AUTH: '{"github-oauth": {"github.com": "${{ secrets.GPPACKAGIST_PAT }}"}}'
+
+jobs:
+  build-vendor-cache:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          ini-values: "memory_limit=1G"
+          coverage: none
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v3
+
+      - name: Pack everything composer created
+        run: |
+          # Untracked files after a clean checkout + composer install are
+          # exactly the composer output (vendor/, web/wp/, installed
+          # plugins/themes). Chunk under GitHub's 100 MB blob limit.
+          mkdir -p /tmp/vendor-cache
+          git ls-files --others \
+            | grep -vE '^(\.env|auth\.json|node_modules/)' \
+            | tar czf - --files-from=- \
+            | split -b 90m - /tmp/vendor-cache/vendor-cache.tar.gz.part-
+          ls -lh /tmp/vendor-cache/
+
+      - name: Force-push orphan claude-vendor-cache branch
+        run: |
+          cd "$(mktemp -d)"
+          git init -q -b claude-vendor-cache
+          cp /tmp/vendor-cache/vendor-cache.tar.gz.part-* .
+          cat > README.md <<'EOF'
+          Machine-generated composer output for Claude Code cloud sessions.
+          Built by .github/workflows/build-vendor-cache.yml from composer.lock
+          on the default branch. Do not edit; do not merge this branch.
+          Reassemble with: cat vendor-cache.tar.gz.part-* | tar xz
+          EOF
+          echo "source-commit: ${GITHUB_SHA}" > BUILT_FROM
+          git add -A
+          git -c user.name=github-actions -c user.email=github-actions@github.com \
+            commit -q -m "Vendor cache built from ${GITHUB_SHA}"
+          git push --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" claude-vendor-cache
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
