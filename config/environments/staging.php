@@ -19,8 +19,7 @@ use function Env\env;
 Config::define('DISALLOW_INDEXING', true);
 
 /**
- * WP-Stateless media offload to GCS. The service account key is mounted from
- * Secret Manager; pods have no writable local uploads directory.
+ * WP-Stateless media offload to GCS
  */
 Config::define('WP_STATELESS_MEDIA_BUCKET', env('WP_STATELESS_MEDIA_BUCKET'));
 Config::define('WP_STATELESS_MEDIA_KEY_FILE_PATH', env('WP_STATELESS_MEDIA_KEY_FILE_PATH'));

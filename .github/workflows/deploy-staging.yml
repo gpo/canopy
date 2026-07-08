@@ -38,8 +38,6 @@ jobs:
           tag="${GAR_LOCATION}-docker.pkg.dev/${{ vars.GCP_PROJECT_STAGE }}/${GAR_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
           echo "image=${tag}" >> "$GITHUB_OUTPUT"
 
-      # Immutable, SHA-tagged images only — never build/deploy `latest`, so
-      # every staging deploy is traceable back to a single commit.
       - uses: docker/build-push-action@v6
         with:
           context: .
@@ -52,11 +50,8 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      # Canopy's own image is now built and pushed. Cutting the staging pod
-      # over to it is a GitOps update in gpo-platform-configs: bump the image
-      # tag in kubernetes/canopy/values.yaml (mirrors kubernetes/grassroots/)
-      # and let ArgoCD sync it. That manifest doesn't exist yet — this step
-      # is a placeholder until the app/kubernetes layers for canopy land.
+      # Placeholder until kubernetes/canopy/values.yaml exists in
+      # gpo-platform-configs — cutover is a GitOps image-tag bump there.
       - run: |
           echo "Built ${{ needs.build-and-push.outputs.image }}"
           echo "TODO: bump kubernetes/canopy/values.yaml in gpo-platform-configs once it exists"
