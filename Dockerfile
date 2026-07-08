@@ -54,7 +54,24 @@ RUN curl -fsSL -o /usr/local/bin/wp \
       "https://github.com/wp-cli/wp-cli/releases/download/v${WP_CLI_VERSION}/wp-cli-${WP_CLI_VERSION}.phar" \
     && chmod +x /usr/local/bin/wp
 
-COPY docker/php-fpm/www.conf /usr/local/etc/php-fpm.d/www.conf
+# Append (not replace) the stock pool config, so pool sizing (pm.max_children
+# etc.) stays whatever upstream ships until we have real GKE Autopilot
+# resource requests and load data to size it against — a rebuild-required
+# guess now is worse than upstream's neutral default. Only the two things
+# that are actually load-bearing in a container get added:
+#   - clear_env=no: FPM's default (clear_env=yes) strips inherited env vars
+#     from workers, which would silently break every env()-driven
+#     Config::define() call once config comes from a k8s ConfigMap/Secret.
+#   - worker output routed to stderr, so PHP warnings/var_dump reach
+#     container logs instead of being discarded.
+RUN { \
+      echo ''; \
+      echo 'clear_env = no'; \
+      echo 'catch_workers_output = yes'; \
+      echo 'decorate_workers_output = no'; \
+      echo 'php_admin_flag[log_errors] = on'; \
+      echo 'php_admin_value[error_log] = /proc/self/fd/2'; \
+    } >> /usr/local/etc/php-fpm.d/www.conf
 
 WORKDIR /app
 
