@@ -1,5 +1,8 @@
 # syntax=docker/dockerfile:1
 
+ARG PHP_VERSION=8.4
+ARG WP_CLI_VERSION=2.11.0
+
 # ---- Stage 1: Composer dependencies -----------------------------------
 FROM composer:2 AS vendor
 
@@ -19,17 +22,21 @@ RUN --mount=type=secret,id=composer_auth,dst=/app/auth.json \
 COPY . .
 
 # ---- Stage 2: runtime ---------------------------------------------------
-FROM php:8.3-fpm-bookworm AS runtime
+FROM php:${PHP_VERSION}-fpm-bookworm AS runtime
+ARG WP_CLI_VERSION
 
 # Bedrock/WordPress required extensions.
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions \
       bcmath \
+      curl \
       exif \
       gd \
       intl \
+      mbstring \
       mysqli \
       opcache \
+      pdo_mysql \
       redis \
       zip
 
@@ -41,9 +48,13 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
       echo 'opcache.interned_strings_buffer=16'; \
     } > "$PHP_INI_DIR/conf.d/opcache-recommended.ini"
 
-# wp-cli, used for migrations, cron, and network/site management.
-RUN curl -fsSL -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+# Pinned wp-cli release (not the gh-pages "latest" build) so the image is
+# reproducible from its tag alone.
+RUN curl -fsSL -o /usr/local/bin/wp \
+      "https://github.com/wp-cli/wp-cli/releases/download/v${WP_CLI_VERSION}/wp-cli-${WP_CLI_VERSION}.phar" \
     && chmod +x /usr/local/bin/wp
+
+COPY docker/php-fpm/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 WORKDIR /app
 
@@ -58,4 +69,8 @@ USER www-data
 
 EXPOSE 9000
 
+# No Docker HEALTHCHECK here: this container only speaks FastCGI on 9000, so
+# there's no cheap HTTP probe to run. Liveness/readiness are handled by the
+# k8s probes hitting the nginx sidecar's /healthz, which proxies to this
+# container over FastCGI and so exercises both.
 CMD ["php-fpm"]
