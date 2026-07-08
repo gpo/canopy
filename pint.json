@@ -1,0 +1,7 @@
+{
+    "exclude": [
+        "web/wp",
+        "web/app/themes/twentytwentyfive",
+        "web/app/uploads"
+    ]
+}
