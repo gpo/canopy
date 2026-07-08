@@ -1,0 +1,9 @@
+{
+    "exclude": [
+        "web/wp",
+        "web/app/plugins",
+        "web/app/mu-plugins",
+        "web/app/themes/twentytwentyfive",
+        "web/app/uploads"
+    ]
+}

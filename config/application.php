@@ -9,6 +9,9 @@
  * can.
  */
 
+use Dotenv\Repository\Adapter\EnvConstAdapter;
+use Dotenv\Repository\Adapter\PutenvAdapter;
+use Dotenv\Repository\RepositoryBuilder;
 use Roots\WPConfig\Config;
 
 use function Env\env;
@@ -33,20 +36,20 @@ $root_dir = dirname(__DIR__);
  *
  * @var non-falsy-string
  */
-$webroot_dir = $root_dir . '/web';
+$webroot_dir = $root_dir.'/web';
 
 /**
  * Use Dotenv to set required environment variables and load .env file in root
  * .env.local will override .env if it exists
  */
-if (file_exists($root_dir . '/.env')) {
-    $env_files = file_exists($root_dir . '/.env.local')
+if (file_exists($root_dir.'/.env')) {
+    $env_files = file_exists($root_dir.'/.env.local')
         ? ['.env', '.env.local']
         : ['.env'];
 
-    $repository = Dotenv\Repository\RepositoryBuilder::createWithNoAdapters()
-        ->addAdapter(Dotenv\Repository\Adapter\EnvConstAdapter::class)
-        ->addAdapter(Dotenv\Repository\Adapter\PutenvAdapter::class)
+    $repository = RepositoryBuilder::createWithNoAdapters()
+        ->addAdapter(EnvConstAdapter::class)
+        ->addAdapter(PutenvAdapter::class)
         ->immutable()
         ->make();
 
@@ -54,7 +57,7 @@ if (file_exists($root_dir . '/.env')) {
     $dotenv->load();
 
     $dotenv->required(['WP_HOME', 'WP_SITEURL']);
-    if (!env('DATABASE_URL')) {
+    if (! env('DATABASE_URL')) {
         $dotenv->required(['DB_NAME', 'DB_USER', 'DB_PASSWORD']);
     }
 }
@@ -68,7 +71,7 @@ define('WP_ENV', env('WP_ENV') ?: 'production');
 /**
  * Set WP_ENVIRONMENT_TYPE if not already defined
  */
-if (!defined('WP_ENVIRONMENT_TYPE')) {
+if (! defined('WP_ENVIRONMENT_TYPE')) {
     $wp_environment_type = env('WP_ENVIRONMENT_TYPE');
 
     if ($wp_environment_type) {
@@ -81,7 +84,7 @@ if (!defined('WP_ENVIRONMENT_TYPE')) {
 /**
  * Set WP_DEVELOPMENT_MODE if explicitly configured
  */
-if (!defined('WP_DEVELOPMENT_MODE')) {
+if (! defined('WP_DEVELOPMENT_MODE')) {
     $wp_development_mode = env('WP_DEVELOPMENT_MODE');
 
     if ($wp_development_mode) {
@@ -99,8 +102,8 @@ Config::define('WP_SITEURL', env('WP_SITEURL'));
  * Custom Content Directory
  */
 Config::define('CONTENT_DIR', '/app');
-Config::define('WP_CONTENT_DIR', $webroot_dir . Config::get('CONTENT_DIR'));
-Config::define('WP_CONTENT_URL', Config::get('WP_HOME') . Config::get('CONTENT_DIR'));
+Config::define('WP_CONTENT_DIR', $webroot_dir.Config::get('CONTENT_DIR'));
+Config::define('WP_CONTENT_URL', Config::get('WP_HOME').Config::get('CONTENT_DIR'));
 
 /**
  * DB settings
@@ -172,7 +175,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROT
     $_SERVER['HTTPS'] = 'on';
 }
 
-$env_config = __DIR__ . '/environments/' . WP_ENV . '.php';
+$env_config = __DIR__.'/environments/'.WP_ENV.'.php';
 
 if (file_exists($env_config)) {
     require_once $env_config;
@@ -183,6 +186,6 @@ Config::apply();
 /**
  * Bootstrap WordPress
  */
-if (!defined('ABSPATH')) {
-    define('ABSPATH', $webroot_dir . '/wp/');
+if (! defined('ABSPATH')) {
+    define('ABSPATH', $webroot_dir.'/wp/');
 }
