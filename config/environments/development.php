@@ -16,6 +16,10 @@ Config::define('WP_DISABLE_FATAL_ERROR_HANDLER', true);
 Config::define('SCRIPT_DEBUG', true);
 Config::define('DISALLOW_INDEXING', true);
 
+// Page-load cron is disabled by default for staging/production (see
+// config/application.php); keep it on locally where there's no CronJob.
+Config::define('DISABLE_WP_CRON', false);
+
 ini_set('display_errors', '1');
 
 // Enable plugin and theme updates and installation from the admin
