@@ -51,7 +51,7 @@ RUN curl -fsSL -o /usr/local/bin/wp \
 
 RUN { \
       echo ''; \
-      echo 'clear_env = no'; \
+      echo 'clear_env = no ; required'; \
       echo 'catch_workers_output = yes'; \
       echo 'decorate_workers_output = no'; \
       echo 'php_admin_flag[log_errors] = on'; \
