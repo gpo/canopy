@@ -1,12 +1,4 @@
 #!/usr/bin/env bash
-# Fetch a named secret bundle from Google Secret Manager and write it out as
-# .env.local, for developers who need to run against staging-shaped config
-# locally (e.g. reproducing a bug against real DB/GCS credentials).
-#
-# Usage: bin/bootstrap-secrets.sh <gcp-project> <secret-name> [version]
-#
-# The named secret is expected to hold a dotenv-formatted payload (the same
-# shape as .env.example), managed outside this repo by the infra pipeline.
 
 set -euo pipefail
 

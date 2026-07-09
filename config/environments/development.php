@@ -16,7 +16,6 @@ Config::define('WP_DISABLE_FATAL_ERROR_HANDLER', true);
 Config::define('SCRIPT_DEBUG', true);
 Config::define('DISALLOW_INDEXING', true);
 
-// Keep page-load cron on locally, where there's no CronJob.
 Config::define('DISABLE_WP_CRON', false);
 
 ini_set('display_errors', '1');

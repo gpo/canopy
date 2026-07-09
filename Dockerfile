@@ -45,18 +45,10 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
       echo 'opcache.interned_strings_buffer=16'; \
     } > "$PHP_INI_DIR/conf.d/opcache-recommended.ini"
 
-# Pinned release, not the gh-pages "latest" build, so the image is
-# reproducible from its tag alone.
 RUN curl -fsSL -o /usr/local/bin/wp \
       "https://github.com/wp-cli/wp-cli/releases/download/v${WP_CLI_VERSION}/wp-cli-${WP_CLI_VERSION}.phar" \
     && chmod +x /usr/local/bin/wp
 
-# Append to (not replace) the stock pool config, so pool sizing like
-# pm.max_children stays at upstream's default until real GKE Autopilot
-# resource/load data exists to size it against. clear_env=no is required —
-# FPM's default strips inherited env vars from workers, which would break
-# every env()-driven Config::define() call once config comes from a k8s
-# ConfigMap/Secret.
 RUN { \
       echo ''; \
       echo 'clear_env = no'; \
@@ -70,9 +62,6 @@ WORKDIR /app
 
 COPY --from=vendor --chown=www-data:www-data /app /app
 
-# No .env is shipped — Bedrock config comes entirely from the pod's
-# ConfigMap/Secret, and the root filesystem is expected to run read-only via
-# securityContext (readOnlyRootFilesystem: true) with an emptyDir at /tmp.
 USER www-data
 
 EXPOSE 9000

@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write # required for keyless auth via Workload Identity Federation
+  id-token: write
 
 env:
   GAR_LOCATION: northamerica-northeast2
@@ -50,8 +50,6 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      # Placeholder until kubernetes/canopy/values.yaml exists in
-      # gpo-platform-configs — cutover is a GitOps image-tag bump there.
       - run: |
           echo "Built ${{ needs.build-and-push.outputs.image }}"
           echo "TODO: bump kubernetes/canopy/values.yaml in gpo-platform-configs once it exists"

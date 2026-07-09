@@ -1,10 +1,4 @@
 #!/usr/bin/env bash
-# Bootstrap a local multisite network for development: installs WordPress,
-# converts it to a subdomain multisite network, creates a seed subsite, and
-# activates the network plugins. Safe to re-run — each step no-ops if the
-# corresponding state already exists.
-#
-# Usage: bin/setup-local.sh [site-title]
 
 set -euo pipefail
 

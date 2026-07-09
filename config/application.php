@@ -156,7 +156,6 @@ Config::define('BLOG_ID_CURRENT_SITE', 1);
  * Custom Settings
  */
 Config::define('AUTOMATIC_UPDATER_DISABLED', true);
-// Driven by a Kubernetes CronJob instead of page-load cron; see environments/development.php.
 Config::define('DISABLE_WP_CRON', env('DISABLE_WP_CRON') ?: true);
 
 // Disable the plugin and theme file editor in the admin
