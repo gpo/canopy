@@ -15,6 +15,18 @@
 			"custom": false,
 			"customGradient": false,
 			"customDuotone": false,
+			"gradients": [
+				{
+					"slug": "green",
+					"name": "Green Gradient",
+					"gradient": "linear-gradient(135deg, #2f772f 0%, #75ae55 100%)"
+				},
+				{
+					"slug": "green-pale",
+					"name": "Pale Green Gradient",
+					"gradient": "linear-gradient(135deg, #75ae55 0%, #bddfaa 100%)"
+				}
+			],
 			"palette": [
 				{
 					"slug": "base",
@@ -42,9 +54,9 @@
 					"color": "#75ae55"
 				},
 				{
-					"slug": "sun",
-					"name": "Sun Yellow",
-					"color": "#f7e16d"
+					"slug": "pale",
+					"name": "Pale Green",
+					"color": "#bddfaa"
 				},
 				{
 					"slug": "sky",
@@ -52,9 +64,9 @@
 					"color": "#52c1db"
 				},
 				{
-					"slug": "alert",
-					"name": "Alert Red",
-					"color": "#ff1616"
+					"slug": "sun",
+					"name": "Sun Yellow",
+					"color": "#f7e16d"
 				},
 				{
 					"slug": "gray",
@@ -81,7 +93,7 @@
 				{
 					"slug": "body",
 					"name": "Body",
-					"fontFamily": "\"AvenirNext LT Pro\", Helvetica, Arial, sans-serif"
+					"fontFamily": "\"Avenir Next LT Pro\", \"AvenirNext LT Pro\", Helvetica, Arial, sans-serif"
 				},
 				{
 					"slug": "mono",
