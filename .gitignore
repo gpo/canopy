@@ -8,9 +8,11 @@ web/wp-config-ddev.php
 web/wp
 web/.htaccess
 
-# Application — plugins and themes are Composer-managed
+# Application — plugins and themes are Composer-managed, except first-party
+# GPO plugins committed directly to this repo
 web/app/plugins/*
 !web/app/plugins/.gitkeep
+!web/app/plugins/canopy-blocks/
 web/app/mu-plugins/*/
 web/app/themes/twentytwentyfive/
 web/app/upgrade
