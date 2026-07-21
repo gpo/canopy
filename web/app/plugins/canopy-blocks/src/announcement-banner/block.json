@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "canopy/announcement-banner",
+	"title": "Announcement Banner",
+	"category": "design",
+	"description": "A sitewide announcement banner with an optional link, meant to live in the header template part.",
+	"textdomain": "canopy-blocks",
+	"attributes": {
+		"enabled": {
+			"type": "boolean",
+			"default": true
+		},
+		"message": {
+			"type": "string",
+			"default": ""
+		},
+		"linkText": {
+			"type": "string",
+			"default": ""
+		},
+		"linkUrl": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"html": false
+	},
+	"render": "file:./render.php",
+	"style": "file:./style.css"
+}

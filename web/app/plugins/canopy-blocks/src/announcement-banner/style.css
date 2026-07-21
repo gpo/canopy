@@ -1,0 +1,15 @@
+.wp-block-canopy-announcement-banner {
+	background: var(--wp--preset--color--primary, #2f772f);
+	color: var(--wp--preset--color--base, #fff);
+	padding: var(--wp--preset--spacing--20, 0.5rem) var(--wp--preset--spacing--30, 1rem);
+	text-align: center;
+}
+
+.wp-block-canopy-announcement-banner p {
+	margin: 0;
+}
+
+.wp-block-canopy-announcement-banner a {
+	color: inherit;
+	text-decoration: underline;
+}
