@@ -18,7 +18,8 @@
 - [ADR-007 — DDEV for local development](#adr-007--ddev-for-local-development)
 
 - [ADR-011 — Sage as the base WordPress theme](#adr-011--sage-as-the-base-wordpress-theme)
-- [ADR-012 — pnpm and TypeScript for front-end tooling](#adr-012--pnpm-and-typescript-for-front-end-tooling)
+- [ADR-012 — pnpm as the front-end package manager](#adr-012--pnpm-as-the-front-end-package-manager)
+- [ADR-013 — TypeScript as the front-end language standard](#adr-013--typescript-as-the-front-end-language-standard)
 
 **TBD**
 
@@ -298,7 +299,7 @@ Tonik satisfies the Tailwind freedom requirement but uses a Webpack build pipeli
 
 ---
 
-## ADR-012 — pnpm and TypeScript for front-end tooling
+## ADR-012 — pnpm as the front-end package manager
 
 **Status:** accepted
 **Date:** 2026-07-23
@@ -306,30 +307,54 @@ Tonik satisfies the Tailwind freedom requirement but uses a Webpack build pipeli
 
 ### Context and Problem Statement
 
-The Sage theme (ADR-011) and its companion blocks plugin (ADR-005) both ship front-end JavaScript build tooling via Vite. As the shared block library grows across the network, plain JavaScript makes prop and API-shape mistakes visible only at runtime, and npm's flat, duplication-prone `node_modules` and weak workspace support add friction as more front-end packages (theme, blocks plugin, specialty sites) are introduced. A package manager and a source-language standard need to be set once, for all JavaScript/TypeScript work on the network.
+The Sage theme (ADR-011) and its companion blocks plugin (ADR-005) both ship front-end build tooling via Vite, each with its own dependency tree. As more front-end packages join the network (theme, blocks plugin, specialty sites), npm's flat `node_modules` duplicates shared dependencies across every package and offers no first-class way to link them together. A single package manager needs to be settled on for all front-end work on the network.
 
 ### Considered Options
 
 - **npm** — the default Node.js package manager, no extra install required
 - **yarn** — a long-standing npm alternative with a different lockfile format but similar semantics
 - **pnpm** — content-addressable store, strict non-flat `node_modules`, native workspace support
+
+### Decision Outcome
+
+**Chosen option: pnpm.**
+
+pnpm's content-addressable store avoids re-downloading and duplicating the same dependency across the theme, blocks plugin, and any future front-end package, and its strict `node_modules` prevents phantom dependencies — importing a package that was never declared as a direct dependency — which npm and yarn silently allow. Its native workspace support is a better fit than npm or yarn if the block library and theme are later split into separate packages that need to reference each other locally.
+
+**Consequences:**
+
+- `pnpm-lock.yaml` is the committed lockfile — `package-lock.json` and `yarn.lock` must never be committed
+- Local setup (`docs/local-dev.md`) and CI both install front-end dependencies with `pnpm install`
+- Developers need pnpm installed locally; it is not bundled with Node.js the way npm is
+
+---
+
+## ADR-013 — TypeScript as the front-end language standard
+
+**Status:** accepted
+**Date:** 2026-07-23
+**Decision makers: Mark Wong**
+
+### Context and Problem Statement
+
+Front-end code in the Sage theme and blocks plugin (ADR-005, ADR-011) has been written as plain JavaScript. As the shared Gutenberg block library grows, prop-shape and API-mismatch mistakes in block components only surface at runtime, in the browser — there is no compile-time check. A language standard needs to be set for all new front-end source.
+
+### Considered Options
+
 - **JavaScript** — no type system; mistakes surface at runtime or in the browser
 - **TypeScript** — a typed superset of JavaScript, checked at build time and stripped before shipping
 
 ### Decision Outcome
 
-**Chosen option: pnpm for package management; TypeScript for front-end source, with `.ts`/`.tsx` favoured over `.js`/`.jsx`.**
+**Chosen option: TypeScript, with `.ts`/`.tsx` favoured over `.js`/`.jsx` for new files.**
 
-pnpm's content-addressable store avoids re-downloading and duplicating the same dependency across the theme, blocks plugin, and any future front-end package, and its strict `node_modules` prevents phantom dependencies — importing a package that was never declared as a direct dependency — which npm and yarn silently allow. Its native workspace support is a better fit than npm or yarn if the block library and theme are later split into separate packages.
-
-TypeScript catches an entire class of prop-shape and API-mismatch bugs in Gutenberg block components at compile time instead of in the browser, and its type definitions make Meta Box field shapes and REST payloads self-documenting — useful on a team with a single front-end developer and no one else to ask.
+TypeScript catches an entire class of prop-shape and API-mismatch bugs in Gutenberg block components at compile time instead of in the browser, and its type definitions make Meta Box field shapes and REST payloads self-documenting — useful on a team with a single front-end developer and no one else to ask when an API shape is unclear.
 
 **Consequences:**
 
 - New front-end files are written as `.ts`/`.tsx`; existing `.js`/`.jsx` files are migrated opportunistically, not in one pass
-- `pnpm-lock.yaml` is the committed lockfile — `package-lock.json` and `yarn.lock` must never be committed
-- Local setup (`docs/local-dev.md`) and CI both install front-end dependencies with `pnpm install`
-- A `tsconfig.json` is required at the theme and blocks-plugin roots; Vite's built-in TypeScript support is used as-is
+- A `tsconfig.json` is required at the theme and blocks-plugin roots; Vite's built-in TypeScript support is used as-is, no additional compiler step
+- Third-party packages without published types need `@types/*` packages or local ambient declarations
 
 ---
 
