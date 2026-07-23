@@ -1,0 +1,15 @@
+.git
+.ddev
+.env
+.env.*
+!.env.example
+vendor
+node_modules
+web/wp
+web/app/uploads/*
+!web/app/uploads/.gitkeep
+tests
+docs
+*.md
+.dockerignore
+Dockerfile

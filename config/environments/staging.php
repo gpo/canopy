@@ -6,6 +6,8 @@
 
 use Roots\WPConfig\Config;
 
+use function Env\env;
+
 /**
  * You should try to keep staging as close to production as possible. However,
  * should you need to, you can always override production configuration values
@@ -15,3 +17,10 @@ use Roots\WPConfig\Config;
  * Example: `Config::define('DISALLOW_FILE_MODS', false);`
  */
 Config::define('DISALLOW_INDEXING', true);
+
+/**
+ * WP-Stateless media offload to GCS
+ */
+Config::define('WP_STATELESS_MEDIA_BUCKET', env('WP_STATELESS_MEDIA_BUCKET'));
+Config::define('WP_STATELESS_MEDIA_KEY_FILE_PATH', env('WP_STATELESS_MEDIA_KEY_FILE_PATH'));
+Config::define('WP_STATELESS_MEDIA_MODE', env('WP_STATELESS_MEDIA_MODE') ?: 'stateless');

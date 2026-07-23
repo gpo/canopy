@@ -15,7 +15,7 @@ Director of Technology — sole technical owner.
 
 - **Runtime:** Kubernetes on GKE
 - **Database:** Cloud SQL (MySQL, GCP-managed)
-- **Media:** GCS via WP Offload Media — pods are stateless
+- **Media:** GCS via WP-Stateless (`stateless` mode) — pods are stateless
 
 ## Development Constraints
 
