@@ -147,7 +147,7 @@ Config::define('NONCE_SALT', env('NONCE_SALT'));
 Config::define('WP_ALLOW_MULTISITE', true);
 Config::define('MULTISITE', true);
 Config::define('SUBDOMAIN_INSTALL', true);
-Config::define('DOMAIN_CURRENT_SITE', env('DOMAIN_CURRENT_SITE'));
+Config::define('DOMAIN_CURRENT_SITE', parse_url(env('WP_HOME'), PHP_URL_HOST));
 Config::define('PATH_CURRENT_SITE', '/');
 Config::define('SITE_ID_CURRENT_SITE', 1);
 Config::define('BLOG_ID_CURRENT_SITE', 1);
