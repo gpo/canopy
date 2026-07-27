@@ -1,6 +1,2 @@
 packages:
   - "web/app/plugins/canopy-blocks"
-
-# web/app/plugins/qomon-wp-plugin is a vendored, Composer-managed checkout
-# of a separate repo (gpo/qomon-wp-plugin) — it is gitignored here and has
-# its own npm-based tooling upstream. Do not add it to this workspace.
