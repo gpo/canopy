@@ -42,6 +42,10 @@ Network, riding site templates (target + development tiers), Qomon, Stripe. Cont
 
 Hard requirement, deferred to Phase 3. See `docs/multisite-platform.md` for strategy options.
 
+## Conventions
+
+- No explanatory comments in config files (`.npmrc`, `pnpm-workspace.yaml`, etc.). If a rationale is worth preserving, put it in `docs/` instead.
+
 ## Verification
 
 - Lint: `vendor/bin/pint --test` (fix with `vendor/bin/pint`)
