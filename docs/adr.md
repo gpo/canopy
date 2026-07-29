@@ -307,7 +307,7 @@ Tonik satisfies the Tailwind freedom requirement but uses a Webpack build pipeli
 
 ### Context and Problem Statement
 
-The Sage theme (ADR-011) and its companion blocks plugin (ADR-005) both ship front-end build tooling via Vite, each with its own dependency tree. As more front-end packages join the network (theme, blocks plugin, specialty sites), npm's flat `node_modules` duplicates shared dependencies across every package and offers no first-class way to link them together. A single package manager needs to be settled on for all front-end work on the network.
+The theme and its companion blocks plugin (ADR-005) each carry their own front-end dependency tree and build step. As more front-end packages join the network (theme, blocks plugin, specialty sites), npm's flat `node_modules` duplicates shared dependencies across every package and offers no first-class way to link them together. A single package manager needs to be settled on for all front-end work on the network.
 
 ### Considered Options
 
@@ -337,7 +337,7 @@ pnpm's content-addressable store avoids re-downloading and duplicating the same 
 
 ### Context and Problem Statement
 
-Front-end code in the Sage theme and blocks plugin (ADR-005, ADR-011) has been written as plain JavaScript. As the shared Gutenberg block library grows, prop-shape and API-mismatch mistakes in block components only surface at runtime, in the browser — there is no compile-time check. A language standard needs to be set for all new front-end source.
+Front-end code in the theme and blocks plugin (ADR-005) has been written as plain JavaScript. As the shared Gutenberg block library grows, prop-shape and API-mismatch mistakes in block components only surface at runtime, in the browser — there is no compile-time check. A language standard needs to be set for all new front-end source.
 
 ### Considered Options
 
@@ -353,7 +353,7 @@ TypeScript catches an entire class of prop-shape and API-mismatch bugs in Gutenb
 **Consequences:**
 
 - New front-end files are written as `.ts`/`.tsx`; existing `.js`/`.jsx` files are migrated opportunistically, not in one pass
-- A `tsconfig.json` is required at the theme and blocks-plugin roots; Vite's built-in TypeScript support is used as-is, no additional compiler step
+- A `tsconfig.json` is required at the theme and blocks-plugin roots; the bundler's built-in TypeScript support is used as-is, no separate compiler step
 - Third-party packages without published types need `@types/*` packages or local ambient declarations
 
 ---

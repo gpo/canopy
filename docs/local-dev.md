@@ -37,6 +37,6 @@ ddev restart       # restart after config changes
 ddev ssh           # shell into the web container
 ddev mysql         # MySQL shell
 ddev wp            # WP-CLI
-pnpm dev           # Vite dev server for the theme/blocks front end
+pnpm dev           # front-end dev server (watch + hot reload)
 pnpm build         # production front-end build
 ```
