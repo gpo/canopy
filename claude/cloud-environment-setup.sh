@@ -22,6 +22,5 @@ CANOPY_DIR=/home/user/canopy
 ) || {
   msg="canopy: composer install failed during environment setup - PHP tooling (pint/pest) unavailable until this is fixed"
   echo "!! $msg"
-  mkdir -p ~/.claude
-  echo "$msg" >> ~/.claude/cloud-setup-errors.log
+  echo "$msg" >> ~/.cloud-setup-errors.log
 }

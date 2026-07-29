@@ -15,7 +15,7 @@ else
 fi
 ```
 
-The fetched script (`claude/cloud-environment-setup.sh`) is self-contained: it clones canopy itself if it isn't already attached as a source, rather than assuming a pre-existing checkout. It logs its own failures (e.g. a failing `composer install`) to `~/.claude/cloud-setup-errors.log` too - append-only, so it must run **after** any step that truncates that file. On failure this surfaces at the start of the next session instead of vanishing into an unwatched setup-script console.
+The fetched script (`claude/cloud-environment-setup.sh`) is self-contained: it clones canopy itself if it isn't already attached as a source, rather than assuming a pre-existing checkout. It logs its own failures (e.g. a failing `composer install`) to `~/.cloud-setup-errors.log` too - append-only, so it must run **after** any step that truncates that file. On failure this surfaces at the start of the next session instead of vanishing into an unwatched setup-script console.
 
 `.claude/setup-env.sh` runs the same script for convenience when working by hand from an existing checkout - it's a thin wrapper, not a second copy, so there's nothing to keep in sync.
 
