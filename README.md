@@ -11,8 +11,7 @@ Sessions in [Claude Code on the web](https://claude.ai/code) install this repo's
 if curl -fsSL "https://raw.githubusercontent.com/gpo/canopy/main/claude/cloud-environment-setup.sh" -o /tmp/cloud-environment-setup.sh; then
   bash /tmp/cloud-environment-setup.sh
 else
-  mkdir -p ~/.claude
-  echo "canopy: could not fetch cloud-environment-setup.sh during environment setup - PHP tooling (pint/pest) unavailable until this is fixed" >> ~/.claude/cloud-setup-errors.log
+  echo "canopy: could not fetch cloud-environment-setup.sh during environment setup - PHP tooling (pint/pest) unavailable until this is fixed" >> ~/.cloud-setup-errors.log
 fi
 ```
 
