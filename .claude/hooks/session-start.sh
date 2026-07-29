@@ -1,9 +1,11 @@
 #!/bin/bash
 set -uo pipefail
 
-# Only run this in Claude Code on the web / remote sandboxes. The container
-# state is cached after this hook completes, so installs are one-time per
-# environment build, not per session.
+# Only run this in Claude Code on the web / remote sandboxes - this early
+# exit gates everything below (composer install, MariaDB/wp-cli
+# provisioning, .env generation included), so none of it touches a local
+# dev machine. The container state is cached after this hook completes, so
+# installs are one-time per environment build, not per session.
 if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
   exit 0
 fi
