@@ -1,6 +1,8 @@
 {
     "exclude": [
         "web/wp",
+        "web/app/plugins/bedrock-disallow-indexing",
+        "web/app/plugins/qomon-wp-plugin",
         "web/app/themes/twentytwentyfive",
         "web/app/uploads"
     ]

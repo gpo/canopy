@@ -10,24 +10,19 @@ fi
 
 cd "$CLAUDE_PROJECT_DIR"
 
-# composer install cannot work here: the session proxy scopes GitHub access
-# to this repo, so dist zipballs 403 and composer falls back to doomed git
-# clones. CI builds the composer output and force-pushes it as a chunked
-# tarball to the orphan branch claude-vendor-cache (see
-# .github/workflows/build-vendor-cache.yml), which we CAN fetch.
+# composer install here is a fallback: this repo's environment Setup Script
+# (see README.md) already runs it during environment build, when GitHub
+# access is broader than mid-session (verified: composer pulled dist zips
+# straight from api.github.com at setup time; the same host 403s here).
+# If that hasn't run - e.g. a session in an environment without the canopy
+# setup-script line - try it directly anyway and report plainly if it fails.
 if [ -d vendor ]; then
-  echo "==> vendor/ already present (cached container) - skipping vendor cache fetch"
-elif git fetch --depth 1 origin claude-vendor-cache 2>/dev/null; then
-  echo "==> extracting composer vendor cache from claude-vendor-cache branch"
-  git ls-tree --name-only FETCH_HEAD \
-    | grep '^vendor-cache\.tar\.gz\.part-' \
-    | sort \
-    | while read -r part; do git cat-file blob "FETCH_HEAD:$part"; done \
-    | tar xz \
-    && echo "==> vendor cache extracted ($(git cat-file blob FETCH_HEAD:BUILT_FROM 2>/dev/null || echo 'unknown source'))" \
-    || echo "!! vendor cache extraction failed - Pest/Pint unavailable this session"
+  echo "==> vendor/ already present (cached container) - skipping composer install"
+elif COMPOSER_ALLOW_SUPERUSER=1 timeout 180 composer install --no-interaction; then
+  echo "==> composer install succeeded"
 else
-  echo "!! claude-vendor-cache branch not found - run the 'Build vendor cache for cloud agent sessions' workflow once on the default branch. Pest/Pint unavailable until then."
+  echo "!! composer install failed or timed out - Pest/Pint unavailable this session. Add the Setup Script line from README.md to fix this at environment-build time instead."
+  rm -rf vendor web/wp
 fi
 
 # --- Local WordPress runtime -------------------------------------------

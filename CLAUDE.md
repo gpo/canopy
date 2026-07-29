@@ -50,9 +50,9 @@ Hard requirement, deferred to Phase 3. See `docs/multisite-platform.md` for stra
 
 ## Cloud agent sessions (Claude Code on the web)
 
-`.claude/hooks/session-start.sh` provisions the sandbox. `composer install` does not work there (GitHub dist downloads are blocked by the session proxy); the hook instead extracts the composer output from the `claude-vendor-cache` orphan branch, built by `.github/workflows/build-vendor-cache.yml` whenever `composer.lock` changes on the default branch.
+`composer install` reliably fails mid-session (GitHub access is scoped, and most deps resolve through `api.github.com`, which 403s). It reliably **succeeds** during the environment's Setup Script phase instead, which has broader GitHub access - confirmed by a real environment rebuild. See README.md for the Setup Script block to paste in; `.claude/hooks/session-start.sh` only attempts a direct install as a fallback for environments without that block, and it's expected to fail there for the same reason.
 
-The hook also provisions a native WordPress runtime (no Docker/DDEV in the sandbox): MariaDB via apt (`canopy`/`canopy` credentials, matching the generated `.env`), wp-cli, and a sandbox `.env`. Once the vendor cache provides `web/wp`, bootstrap a network with `wp core multisite-install --allow-root`, serve with `wp server --host=127.0.0.1 --port=8080 --allow-root`, and verify rendered pages with the Playwright MCP.
+The hook also provisions a native WordPress runtime (no Docker/DDEV in the sandbox): MariaDB via apt (`canopy`/`canopy` credentials, matching the generated `.env`), wp-cli, and a sandbox `.env`. Once `web/wp` exists (from the Setup Script step), bootstrap a network with `wp core multisite-install --allow-root`, serve with `wp server --host=127.0.0.1 --port=8080 --allow-root`, and verify rendered pages with the Playwright MCP.
 
 ## Key Documents
 
