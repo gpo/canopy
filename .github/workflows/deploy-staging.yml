@@ -1,0 +1,24 @@
+name: Deploy staging
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-push:
+    uses: ./.github/workflows/build-image.yml
+    with:
+      gcp_project: ${{ vars.GCP_PROJECT_STAGE }}
+    secrets: inherit
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Built ${{ needs.build-and-push.outputs.image }}"
+          echo "TODO: bump kubernetes/canopy/values.yaml in gpo-platform-configs once it exists"

@@ -1,0 +1,53 @@
+name: Build and push image
+
+on:
+  workflow_call:
+    inputs:
+      gcp_project:
+        required: true
+        type: string
+    outputs:
+      image:
+        value: ${{ jobs.build-and-push.outputs.image }}
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GAR_LOCATION: northamerica-northeast2
+  GAR_REPOSITORY: gpo
+  IMAGE_NAME: canopy
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ inputs.gcp_project }}
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "${GAR_LOCATION}-docker.pkg.dev" --quiet
+
+      - id: image
+        run: |
+          tag="${GAR_LOCATION}-docker.pkg.dev/${{ inputs.gcp_project }}/${GAR_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
+          echo "image=${tag}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.image.outputs.image }}
+          secrets: |
+            composer_auth=${{ secrets.COMPOSER_AUTH_JSON }}
