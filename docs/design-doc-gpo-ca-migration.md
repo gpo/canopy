@@ -30,9 +30,9 @@ This document covers moving gpo.ca onto the Canopy deployment: what moves as-is,
 - French content (Phase 3)
 - Migrating riding sites (separate workstream; this doc is the flagship site only)
 
-## Open decision: network position
+## Network position: subsite
 
-Whether gpo.ca becomes the network's main site or an ordinary subsite affects domain mapping, cookie scope, and where network-wide settings live. ADR-003 (subdomain plus custom domain structure) implies gpo.ca maps as a custom domain onto a network site. Recommendation pending discussion.
+gpo.ca joins the network as an ordinary subsite with `gpo.ca` mapped as a custom domain (per ADR-003). The network's main site stays a reserved operational site with no public traffic. This keeps gpo.ca un-special-cased: same domain mapping, media paths (`sites/N/`), and provisioning as every other site, so nothing learned on riding sites breaks on the flagship. No strong reason to make it the main site; the main-site slot is hard to change later, and binding it to gpo.ca would couple network-wide settings to one site's lifecycle.
 
 ## Plugin disposition
 
@@ -40,7 +40,8 @@ Whether gpo.ca becomes the network's main site or an ordinary subsite affects do
 |---|---|
 | Platform replaces | Redis Object Cache (platform-managed), WP Mail SMTP (platform mail config), Sucuri (GKE/IAP/Cloudflare posture instead), Enable Media Replace and Phoenix Media Rename (incompatible with GCS offload assumptions; verify) |
 | Carry forward | ACF Pro, The SEO Framework (+ Extension Manager), Redirection, TablePress, Simple History, Custom GPO Blocks, GPO Action Blocks, GPO Documents |
-| Decide | Gravity Forms (+ Turnstile, Webhooks) vs Qomon forms; Popup Maker; PublishPress Revisions Pro; TotalContest Pro; Meta pixel; Royal MCP |
+| Carry forward | Gravity Forms (+ Turnstile, Webhooks) — kept for one-off and admin-facing forms; Qomon handles lead capture, petitions, and campaign forms |
+| Decide | Popup Maker; PublishPress Revisions Pro; TotalContest Pro; Meta pixel; Royal MCP |
 
 All carried plugins ship in the container image via Composer; licensed plugins need a private package source.
 
@@ -58,9 +59,17 @@ Recommendation: option 1 for cutover; treat rebuild as future work.
 1. **Repo work.** Add `gpo-web` theme and carried plugins to the Canopy Composer/image build; resolve any local-filesystem or single-server assumptions in custom plugins.
 2. **Content.** Database export from the legacy site, imported into the network site's tables with `wp search-replace` for domain and path changes. Trial-run into staging first; diff URL samples.
 3. **Media.** Rsync uploads to GCS, then WP Offload Media bulk-link existing attachments. Verify `srcset` and PDF links.
-4. **Forms and integrations.** Recreate or migrate Gravity Forms entries and webhooks (or swap to Qomon per the open decision); re-point Meta pixel, mail, and any external consumers.
+4. **Forms and integrations.** Migrate Gravity Forms definitions, entries, and webhooks intact; stand up Qomon forms for lead capture and campaign flows. Re-point Meta pixel, mail, and any external consumers.
 5. **URLs and SEO.** Import Redirection rules, verify permalink structure matches, crawl staging against a production URL list, keep The SEO Framework meta intact through the DB import.
-6. **Cutover.** Content freeze window; final DB and media delta sync; DNS to the GKE ingress; TLS issued in advance; legacy host kept read-only for rollback until sign-off.
+6. **Cutover.** Edit-only freeze (public site stays fully up; editors pause publishing); final DB and media delta sync; DNS to the GKE ingress with a short TTL and TLS issued in advance, so visitors see no interruption; legacy host kept read-only for rollback.
+
+## Content scope
+
+Migrate everything: published content, drafts, private posts, and full revision history. Trash is excluded.
+
+## Decommission
+
+Legacy host is decommissioned two weeks after cutover. Long enough to catch anything catastrophic, short enough that going back stops being imaginable. After day 14 the legacy DB is snapshotted to cold storage and the host is destroyed.
 
 ## Risks
 
@@ -72,8 +81,7 @@ Recommendation: option 1 for cutover; treat rebuild as future work.
 
 ## Open questions
 
-1. Main site vs subsite on the network?
-2. Gravity Forms kept, or replaced by Qomon for MVP forms?
-3. Do we migrate draft/trash content and full revision history, or published content only?
-4. Who owns the content freeze window and editor comms?
-5. Legacy host decommission timeline after cutover?
+1. Who owns the freeze window and editor comms?
+2. Disposition of the remaining "decide" plugins (Popup Maker, PublishPress Revisions Pro, TotalContest Pro, Meta pixel, Royal MCP)?
+
+Feature requests for the new site are tracked separately in [`feature-requests.md`](feature-requests.md), not here.
