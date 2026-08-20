@@ -47,7 +47,7 @@ All carried plugins ship in the container image via Composer; licensed plugins n
 
 ## Theme
 
-`gpo-web` is a classic custom theme; Canopy's theme direction is a vanilla WordPress block theme (`theme.json`, block templates, `wp-scripts`) with Meta Box for structured fields (ADR-014). Options:
+`gpo-web` is a classic custom theme; Canopy's theme direction is a vanilla WordPress block theme (`theme.json`, block templates, `wp-scripts`) with Meta Box for structured fields (ADR-005, ADR-011). Options:
 
 1. Port `gpo-web` into the repo as-is and run it unchanged on the network (fastest, keeps two theme stacks alive)
 2. Rebuild gpo.ca on the Canopy theme system (slow, couples migration to a redesign)
