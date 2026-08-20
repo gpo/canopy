@@ -13,19 +13,23 @@
 - [ADR-002 — Separate staging cluster](#adr-002--separate-staging-cluster)
 - [ADR-003 — Subdomain and custom domain URL structure](#adr-003--subdomain-and-custom-domain-url-structure)
 - [ADR-004 — Specialty sites on the same network](#adr-004--specialty-sites-on-the-same-network)
-- [ADR-005 — Hybrid theme with Tailwind CSS and Meta Box](#adr-005--hybrid-theme-with-tailwind-css-and-meta-box)
 - [ADR-006 — Three-layer testing framework](#adr-006--three-layer-testing-framework)
 - [ADR-007 — DDEV for local development](#adr-007--ddev-for-local-development)
 
-- [ADR-011 — Sage as the base WordPress theme](#adr-011--sage-as-the-base-wordpress-theme)
 - [ADR-012 — pnpm as the front-end package manager](#adr-012--pnpm-as-the-front-end-package-manager)
 - [ADR-013 — TypeScript as the front-end language standard](#adr-013--typescript-as-the-front-end-language-standard)
+- [ADR-014 — Vanilla WordPress block theme instead of Sage](#adr-014--vanilla-wordpress-block-theme-instead-of-sage)
 
 **TBD**
 
 - [ADR-008 — GKE Autopilot as the Kubernetes runtime](#adr-008--gke-autopilot-as-the-kubernetes-runtime)
 - [ADR-009 — Stateless pods with GCS media offload](#adr-009--stateless-pods-with-gcs-media-offload)
 - [ADR-010 — GCP IAP for WordPress admin panel access](#adr-010--gcp-iap-for-wordpress-admin-panel-access)
+
+**Superseded**
+
+- [ADR-005 — Hybrid theme with Tailwind CSS and Meta Box](#adr-005--hybrid-theme-with-tailwind-css-and-meta-box) — superseded by ADR-014
+- [ADR-011 — Sage as the base WordPress theme](#adr-011--sage-as-the-base-wordpress-theme) — superseded by ADR-014
 
 ---
 
@@ -153,7 +157,7 @@ One network to maintain, one deployment pipeline. Operational simplicity outweig
 
 ## ADR-005 — Hybrid theme with Tailwind CSS and Meta Box
 
-**Status:** accepted
+**Status:** superseded by [ADR-014](#adr-014--vanilla-wordpress-block-theme-instead-of-sage)
 **Date:** 2026-05-26
 **Decision makers: Ian Edington and Mark Wong**
 
@@ -252,7 +256,7 @@ DDEV handles the web server, database, and PHP configuration automatically and i
 
 ## ADR-011 — Sage as the base WordPress theme
 
-**Status:** accepted
+**Status:** superseded by [ADR-014](#adr-014--vanilla-wordpress-block-theme-instead-of-sage)
 **Date:** 2026-06-26
 **Decision makers: Mark Wong**
 
@@ -354,6 +358,35 @@ TypeScript adds additional safety through types, catching prop-shape and API-mis
 
 - A `tsconfig.json` is required at the theme and blocks-plugin roots; the bundler's built-in TypeScript support is used as-is, no separate compiler step
 - Third-party packages without published types need `@types/*` packages or local ambient declarations
+
+---
+
+## ADR-014 — Vanilla WordPress block theme instead of Sage
+
+**Status:** accepted
+**Date:** 2026-07-20
+**Decision makers: Mark Wong**
+
+### Context and Problem Statement
+
+ADR-011 chose Sage as the base theme, and ADR-005 chose a hybrid classic-PHP theme specifically to avoid Full Site Editing (FSE). Building the theme out, Sage's Blade templates require Acorn, a Laravel IoC container bolted onto WordPress — a substantial dependency chain for a single custom theme. Meanwhile WordPress's native FSE tooling (`theme.json`, block templates, `wp-scripts`) turned out to cover what the theme actually needs, with no extra framework to maintain.
+
+### Considered Options
+
+- **Sage** — Blade templates via Acorn, Vite, Tailwind CSS (ADR-011's choice)
+- **Vanilla WordPress block theme** — `theme.json`, block templates/parts, `wp-scripts`; no PHP templating framework
+
+### Decision Outcome
+
+**Chosen option: Vanilla WordPress block theme** (the `biomes` theme).
+
+Acorn and Blade add a full Laravel-style layer this project doesn't need to maintain one theme. The native `theme.json` + `wp-scripts` pipeline is directly supported by WordPress core, is well-documented, and removes a dependency the team would otherwise own indefinitely.
+
+**Consequences:**
+
+- Supersedes ADR-011 (Sage) and ADR-005 (hybrid theme) — global design tokens now live in `theme.json`, not a Tailwind config layered over classic PHP templates
+- The blocks-plugin/theme split established in ADR-005 (custom blocks live in a dedicated plugin, not the theme) still applies
+- No Acorn, no Blade, no Vite — the front-end build for the theme itself is whatever `wp-scripts` provides
 
 ---
 

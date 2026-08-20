@@ -11,7 +11,7 @@ This document covers moving gpo.ca onto the Canopy deployment: what moves as-is,
 ### Current state inventory (2026-08-17, from the live site)
 
 - WordPress 6.9.5, `en_CA`, America/Toronto
-- Theme: `gpo-web` 2.1.0 (custom, classic theme, not on Sage/Tailwind)
+- Theme: `gpo-web` 2.1.0 (custom, classic theme, not on Canopy's theme stack)
 - Content: 3,956 published posts, 534 drafts, plus pages, TablePress tables, and contest content
 - Media: ~8,300 items (~8,000 images, 139 PDFs, a handful of video/audio/docs), currently on local uploads
 - 23 active plugins, grouped by disposition below
@@ -47,7 +47,7 @@ All carried plugins ship in the container image via Composer; licensed plugins n
 
 ## Theme
 
-`gpo-web` is a classic custom theme; Canopy's theme direction is Sage, Tailwind, and Meta Box (ADR-005, ADR-011). Options:
+`gpo-web` is a classic custom theme; Canopy's theme direction is a vanilla WordPress block theme (`theme.json`, block templates, `wp-scripts`) with Meta Box for structured fields (ADR-014). Options:
 
 1. Port `gpo-web` into the repo as-is and run it unchanged on the network (fastest, keeps two theme stacks alive)
 2. Rebuild gpo.ca on the Canopy theme system (slow, couples migration to a redesign)
