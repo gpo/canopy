@@ -346,13 +346,12 @@ Front-end code in the theme and blocks plugin (ADR-005) has been written as plai
 
 ### Decision Outcome
 
-**Chosen option: TypeScript, adopted as soon as possible to close this gap before the block library grows further.**
+**Chosen option: TypeScript, with `.ts`/`.tsx` favoured over `.js`/`.jsx` for new files.**
 
 TypeScript adds additional safety through types, catching prop-shape and API-mismatch bugs in Gutenberg block components at compile time instead of in the browser. It is already used elsewhere at the GPO, keeping the front-end stack consistent with existing practice.
 
 **Consequences:**
 
-- New front-end files are written as `.ts`/`.tsx`; existing `.js`/`.jsx` files are not a migration concern — the codebase has only a couple of front-end files today
 - A `tsconfig.json` is required at the theme and blocks-plugin roots; the bundler's built-in TypeScript support is used as-is, no separate compiler step
 - Third-party packages without published types need `@types/*` packages or local ambient declarations
 
