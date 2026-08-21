@@ -8,9 +8,16 @@
 		"build": "wp-scripts build",
 		"start": "wp-scripts start",
 		"lint:js": "wp-scripts lint-js",
-		"format": "wp-scripts format"
+		"format": "wp-scripts format",
+		"check-types": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@wordpress/scripts": "^30.0.0"
+		"@types/wordpress__block-editor": "^15.0.6",
+		"@types/wordpress__blocks": "^15.17.0",
+		"@types/wordpress__components": "^23.8.0",
+		"@types/wordpress__element": "^2.14.1",
+		"@types/wordpress__i18n": "^3.11.0",
+		"@wordpress/scripts": "^30.0.0",
+		"typescript": "^7.0.2"
 	}
 }
