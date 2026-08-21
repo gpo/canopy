@@ -11,7 +11,12 @@
 		"skipLibCheck": true,
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
+		"types": [
+			"react",
+			"react-dom",
+			"wordpress__block-editor"
+		]
 	},
 	"include": ["src"]
 }
