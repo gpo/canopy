@@ -4,13 +4,7 @@ import { PanelBody, TextControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import type { BlockEditProps } from '@wordpress/blocks';
 
-export interface AnnouncementBannerAttributes
-	extends Record< string, unknown > {
-	enabled: boolean;
-	message: string;
-	linkText: string;
-	linkUrl: string;
-}
+import type { AnnouncementBannerAttributes } from './attributes';
 
 export default function Edit( {
 	attributes,

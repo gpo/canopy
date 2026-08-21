@@ -1,7 +1,8 @@
 import { registerBlockType, type BlockConfiguration } from '@wordpress/blocks';
 
-import Edit, { type AnnouncementBannerAttributes } from './edit';
+import Edit from './edit';
 import metadata from './block.json';
+import type { AnnouncementBannerAttributes } from './attributes';
 
 registerBlockType(
 	metadata as BlockConfiguration< AnnouncementBannerAttributes >,
