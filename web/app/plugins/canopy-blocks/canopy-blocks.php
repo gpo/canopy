@@ -18,14 +18,5 @@ if (! defined('ABSPATH')) {
 require_once __DIR__.'/includes/announcement-banner.php';
 
 add_action('init', function () {
-    wp_register_script(
-        'canopy-blocks-announcement-banner-editor',
-        plugins_url('src/announcement-banner/edit.js', __FILE__),
-        ['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n'],
-        filemtime(__DIR__.'/src/announcement-banner/edit.js')
-    );
-
-    register_block_type(__DIR__.'/src/announcement-banner', [
-        'editor_script' => 'canopy-blocks-announcement-banner-editor',
-    ]);
+    register_block_type(__DIR__.'/build/announcement-banner');
 });
