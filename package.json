@@ -1,0 +1,17 @@
+{
+	"name": "canopy",
+	"private": true,
+	"version": "0.0.0",
+	"description": "Shared codebase for all GPO WordPress work.",
+	"license": "AGPL-3.0-only",
+	"packageManager": "pnpm@10.33.0",
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"build": "pnpm -r build",
+		"start": "pnpm -r start",
+		"lint:js": "pnpm -r lint:js",
+		"format": "pnpm -r format"
+	}
+}

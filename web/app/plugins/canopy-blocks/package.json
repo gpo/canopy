@@ -1,0 +1,16 @@
+{
+	"name": "canopy-blocks",
+	"private": true,
+	"version": "0.1.0",
+	"description": "Custom Gutenberg blocks shared across the Canopy network.",
+	"license": "AGPL-3.0-only",
+	"scripts": {
+		"build": "wp-scripts build",
+		"start": "wp-scripts start",
+		"lint:js": "wp-scripts lint-js",
+		"format": "wp-scripts format"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "^30.0.0"
+	}
+}
