@@ -158,7 +158,7 @@ Config::define('BLOG_ID_CURRENT_SITE', 1);
  * Custom Settings
  */
 Config::define('AUTOMATIC_UPDATER_DISABLED', true);
-Config::define('DISABLE_WP_CRON', env('DISABLE_WP_CRON') ?? true);
+Config::define('DISABLE_WP_CRON', env('DISABLE_WP_CRON') ?: false);
 
 // Disable the plugin and theme file editor in the admin
 Config::define('DISALLOW_FILE_EDIT', true);
