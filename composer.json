@@ -13,6 +13,11 @@
       "url": "https://repo.wp-packages.org"
     },
     {
+      "name": "wpackagist",
+      "type": "composer",
+      "url": "https://wpackagist.org"
+    },
+    {
       "type": "vcs",
       "url": "https://github.com/gpo/qomon-wp-plugin"
     }
