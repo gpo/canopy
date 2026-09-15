@@ -1,0 +1,59 @@
+name: "License Scan"
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    # Licences change under us on republish, so re-scan even when nothing merges.
+    - cron: "0 13 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  trivy-license:
+    name: Copyleft License Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+
+      # Lockfiles carry no licence metadata. Trivy reads the `license` field from
+      # each installed package, so the tree has to be on disk to be scanned.
+      # Dev dependencies stay in: they ship in the build context and a copyleft
+      # tool in the image is still a copyleft dependency.
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
+
+      # MEDIUM blocks as well as HIGH and CRITICAL: Trivy's built-in classifier
+      # files any copyleft licence missing from trivy.yaml under `reciprocal`,
+      # which is MEDIUM. Gating only on HIGH would let unlisted copyleft pass.
+      - name: Scan dependencies for copyleft licenses
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: license
+          trivy-config: trivy.yaml
+          severity: MEDIUM,HIGH,CRITICAL
+          exit-code: 1
+          format: table
+
+      - name: Report full license inventory
+        if: always()
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: license
+          trivy-config: trivy.yaml
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          exit-code: 0
+          format: table
