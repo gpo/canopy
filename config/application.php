@@ -162,9 +162,9 @@ Config::define('CONCATENATE_SCRIPTS', false);
 /**
  * Debugging Settings
  */
-Config::define('WP_DEBUG_DISPLAY', false);
-Config::define('WP_DEBUG_LOG', false);
-Config::define('SCRIPT_DEBUG', false);
+Config::define('WP_DEBUG_DISPLAY', env('WP_DEBUG_DISPLAY'), false);
+Config::define('WP_DEBUG_LOG', env('WP_DEBUG_LOG'), false);
+Config::define('SCRIPT_DEBUG', env('SCRIPT_DEBUG'), false);
 ini_set('display_errors', '0');
 
 /**
@@ -182,6 +182,33 @@ if (file_exists($env_config)) {
 }
 
 Config::apply();
+
+// log the current configuration in use
+
+$sensitive = '/(PASS|SECRET|KEY|TOKEN|SALT|AUTH|CREDENTIAL|DSN|DATABASE_URL|API_)/i';
+
+function redact_constants(array $constants, string $pattern): array {
+    $out = [];
+    foreach ($constants as $name => $value) {
+        if (preg_match($pattern, $name)) {
+            if (is_string($value)) {
+                $out[$name] = '[REDACTED: ' . strlen($value) . ' chars]';
+            } else {
+                $out[$name] = '[REDACTED]';
+            }
+        } else {
+            $out[$name] = $value;
+        }
+    }
+    return $out;
+}
+
+$userConstants = get_defined_constants(true)['user'] ?? [];
+$dump = redact_constants($userConstants, $sensitive);
+
+error_log("=== CURRENT CONFIGURATION ===\n");
+error_log(print_r($dump, true));
+error_log("=============================\n");
 
 /**
  * Bootstrap WordPress
