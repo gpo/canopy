@@ -13,6 +13,11 @@
       "url": "https://repo.wp-packages.org"
     },
     {
+      "name": "wpackagist",
+      "type": "composer",
+      "url": "https://wpackagist.org"
+    },
+    {
       "type": "vcs",
       "url": "https://github.com/gpo/qomon-wp-plugin"
     }
@@ -24,9 +29,11 @@
     "oscarotero/env": "^2.0",
     "roots/bedrock-autoloader": "^1.0",
     "roots/bedrock-disallow-indexing": "^2.0",
+    "roots/multisite-url-fixer": "^1.0",
     "roots/wordpress": "7.0",
     "roots/wp-config": "^1.0",
-    "vlucas/phpdotenv": "^5.0"
+    "vlucas/phpdotenv": "^5.0",
+    "wpackagist-plugin/wp-stateless": "^3.0"
   },
   "require-dev": {
     "antecedent/patchwork": "^2.2",
