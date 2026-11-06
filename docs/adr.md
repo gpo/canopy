@@ -246,7 +246,7 @@ DDEV handles the web server, database, and PHP configuration automatically and i
 **Consequences:**
 
 - Local Kubernetes is not used; infrastructure and deployment-specific changes are tested against the remote cluster directly
-- A `bin/setup-local.sh` script is needed to automate first-run multisite setup (network creation, subsite creation, seed content import) on top of DDEV
+- `bin/setup-local.sh` automates first-run multisite setup (network creation, seed subsite creation, plugin activation) on top of DDEV
 
 ---
 

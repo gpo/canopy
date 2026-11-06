@@ -283,7 +283,7 @@ DDEV is a Docker-based local development tool purpose-built for PHP projects inc
 
 **Local media storage:** A real `canopy-dev` GCS bucket. Local development behaviour matches production exactly — same API, same URLs, same edge cases. Each developer needs a GCS service account credential file stored in `.env`. No emulators.
 
-> **TODO:** Write `bin/setup-local.sh` — WP-CLI commands to create the network, create subsites, and import seed content. A new dev should be up in one command.
+`bin/setup-local.sh` installs the multisite network, creates the `riding` seed subsite, and network-activates plugins; it refuses to run unless `WP_ENV` is `development`.
 
 ---
 
@@ -386,7 +386,7 @@ manual trigger (workflow_dispatch)
 
 **Staging environment:** Separate GKE cluster from production. Full isolation — a runaway staging workload cannot affect production, and infrastructure-level changes (autoscaler thresholds, node configuration) can be tested without risk. Staging must mirror production's site count closely enough to catch upgrade failures at scale — seed it with at least 20–30 subsites before running any upgrade tests.
 
-> **TODO:** Document secrets bootstrap for new developers — how to populate `.env` locally. A `bin/bootstrap-secrets.sh` pulling from Secret Manager (with appropriate IAM role) is the cleanest approach.
+Local secrets are copied into `.env` by hand; no bootstrap script exists yet.
 
 ---
 

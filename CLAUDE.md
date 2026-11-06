@@ -56,7 +56,7 @@ Hard requirement, deferred to Phase 3. See `docs/multisite-platform.md` for stra
 
 Dependencies install via the environment's Setup Script, not the session-start hook — see README.md for why and the exact block.
 
-The hook provisions a native WordPress runtime (no Docker/DDEV in the sandbox): MariaDB via apt (`canopy`/`canopy` credentials, matching the generated `.env`), wp-cli, and a sandbox `.env`. Once `web/wp` exists, bootstrap a network with `wp core multisite-install --allow-root`, serve with `wp server --host=127.0.0.1 --port=8080 --allow-root`, and verify rendered pages with the Playwright MCP.
+The hook provisions a native WordPress runtime (no Docker/DDEV in the sandbox): MariaDB via apt (`canopy`/`canopy` credentials, matching the generated `.env`), wp-cli, and a sandbox `.env`. Once `web/wp` exists, bootstrap the network with `WP_CLI_ALLOW_ROOT=1 bin/setup-local.sh` (the sandbox runs as root, and the script's `wp` wrapper does not pass `--allow-root`), serve with `wp server --host=127.0.0.1 --port=8080 --allow-root`, and verify rendered pages with the Playwright MCP.
 
 ## Key Documents
 

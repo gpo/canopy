@@ -3,7 +3,7 @@ name: canopy
 type: wp-bedrock
 docroot: web
 php_version: "8.4"
-additional_hostnames: []
+additional_hostnames: ["*.canopy"]
 database:
     type: mysql
     version: "8.4"
