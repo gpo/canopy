@@ -20,7 +20,9 @@ cd "$CLAUDE_PROJECT_DIR"
 # setup-script line - try it directly anyway and report plainly if it fails.
 if [ -d vendor ]; then
   echo "==> vendor/ already present (cached container) - skipping composer install"
-elif COMPOSER_ALLOW_SUPERUSER=1 timeout 180 composer install --no-interaction; then
+# --ignore-platform-req=php: the lockfile targets the runtime image's PHP 8.4 while
+# the sandbox image ships 8.3; pint and pest run fine on 8.3.
+elif COMPOSER_ALLOW_SUPERUSER=1 timeout 180 composer install --no-interaction --ignore-platform-req=php; then
   echo "==> composer install succeeded"
 else
   echo "!! composer install failed or timed out - Pest/Pint unavailable this session. Add the Setup Script line from README.md to fix this at environment-build time instead."

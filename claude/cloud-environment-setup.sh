@@ -18,7 +18,9 @@ CANOPY_DIR=/home/user/canopy
   fi
   cd "$CANOPY_DIR"
   echo "==> composer install (canopy)"
-  COMPOSER_ALLOW_SUPERUSER=1 composer install --no-interaction
+  # --ignore-platform-req=php: the lockfile targets the runtime image's PHP 8.4 while
+  # the sandbox image ships 8.3; pint and pest run fine on 8.3.
+  COMPOSER_ALLOW_SUPERUSER=1 composer install --no-interaction --ignore-platform-req=php
 ) || {
   msg="canopy: composer install failed during environment setup - PHP tooling (pint/pest) unavailable until this is fixed"
   echo "!! $msg"
