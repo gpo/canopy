@@ -31,7 +31,7 @@ fi
 # No Docker/DDEV in the sandbox, so run the stack natively: MariaDB via
 # apt, wp-cli via phar, PHP's built-in server via `wp server`. Multisite
 # setup (this network's real topology) is left to the agent per task:
-#   wp core multisite-install --url=http://127.0.0.1:8080 ... --allow-root
+#   WP_CLI_ALLOW_ROOT=1 bin/setup-local.sh
 echo "==> provisioning MariaDB"
 if ! command -v mariadbd >/dev/null 2>&1 && ! command -v mysqld >/dev/null 2>&1; then
   apt-get update -qq >/dev/null 2>&1

@@ -56,6 +56,6 @@ if ! wp site list --field=url | grep -q "^https\?://riding\.${domain_current_sit
 fi
 
 echo "==> Activating network plugins"
-wp plugin activate --network --all
+wp plugin activate --network canopy-blocks wp-stateless
 
 echo "Done. Admin: admin / admin"
