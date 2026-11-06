@@ -21,6 +21,6 @@
 		"@wordpress/element": "^8.5.0",
 		"@wordpress/i18n": "^6.26.0",
 		"@wordpress/scripts": "^30.0.0",
-		"typescript": "^7.0.2"
+		"typescript": "^5.9.3"
 	}
 }
