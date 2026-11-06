@@ -16,7 +16,24 @@ wp() {
 }
 
 if [ ! -f .env ]; then
-  echo ".env not found — copy .env.example to .env and fill in DB/WP_HOME first" >&2
+  echo ".env not found. Copy .env.example to .env and fill in DB/WP_HOME first" >&2
+  exit 1
+fi
+
+read_env_file_value() {
+  [ -f "$1" ] || return 0
+  { grep -E '^WP_ENV=' "$1" || true; } | tail -n 1 | cut -d= -f2- | sed -E "s/^(['\"])(.*)\1\$/\2/"
+}
+
+if [ -n "${WP_ENV+set}" ]; then
+  wp_env="$WP_ENV"
+else
+  wp_env="$(read_env_file_value .env.local)"
+  [ -n "$wp_env" ] || wp_env="$(read_env_file_value .env)"
+fi
+
+if [ "$wp_env" != "development" ]; then
+  echo "Refusing to run: WP_ENV is not development" >&2
   exit 1
 fi
 
