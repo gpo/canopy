@@ -73,7 +73,7 @@ These are the areas most likely to cause scope growth, integration failure, or p
 
 **Why risky:** A plugin that works correctly on a single site can silently misbehave in multisite — writing options to the wrong site, failing to scope queries by `blog_id`, or requiring per-site activation that makes network management unworkable. The failure mode is often subtle and only surfaces with real data.
 
-**Affected plugins:** GiveWP, Qomon fork, Meta Box, and any plugin added later.
+**Affected plugins:** GiveWP, Qomon fork, Secure Custom Fields, and any plugin added later.
 
 **Mitigation:** Multisite compatibility is a required verification step before any plugin is confirmed for the stack — not an assumption. Test with multiple subsites active and verify: activation model (network vs. per-site), option scoping, and query behaviour. WP Offload Media is known-good in multisite and does not need re-verification.
 
@@ -297,7 +297,7 @@ DDEV is a Docker-based local development tool purpose-built for PHP projects inc
 | --- | --- | --- |
 | Styling | Tailwind CSS | Utility-first CSS; shared between theme templates and block styles |
 | Block editor | Gutenberg (custom blocks) | All content components built as custom blocks |
-| Custom fields | Meta Box | Structured content fields, custom post types, custom taxonomies |
+| Custom fields | Secure Custom Fields (ADR-014) | Structured content fields, defined in code |
 
 **Why hybrid over FSE:** FSE is still maturing and has documented rough edges with complex multisite layouts and locked templates. Hybrid gives full control over templates today while keeping the block editor as the primary CA content interface — which is what Phase 2 block library work requires.
 
@@ -320,7 +320,7 @@ DDEV is a Docker-based local development tool purpose-built for PHP projects inc
 | --- | --- | --- |
 | WP Offload Media | GCS media offload | Composer (Delicious Brains) — multisite verified |
 | WP-CLI | Automation, migrations, seed scripts | Included in image |
-| Meta Box | Custom fields, post types, taxonomies | Composer — multisite compatibility TBD (see [Risks](#risks)) |
+| Secure Custom Fields | Custom fields | Composer (wpackagist); multisite compatibility TBD (see [Risks](#risks)) |
 | GiveWP + Stripe add-on | Donations / payments | Composer — multisite compatibility TBD (see [Risks](#risks)) |
 | Qomon WP Plugin (forked) | Forms + Qomon integration | In-repo — scope TBD (see [Risks](#risks)) |
 | `canopy` (custom) | Custom Gutenberg blocks + custom REST API endpoints | In-repo — built by the GPO |

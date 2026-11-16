@@ -39,7 +39,7 @@ gpo.ca joins the network as an ordinary subsite with `gpo.ca` mapped as a custom
 | Disposition | Plugins |
 |---|---|
 | Platform replaces | Redis Object Cache (platform-managed), WP Mail SMTP (platform mail config), Sucuri (GKE/IAP/Cloudflare posture instead), Enable Media Replace and Phoenix Media Rename (incompatible with GCS offload assumptions; verify) |
-| Carry forward | ACF Pro, The SEO Framework (+ Extension Manager), Redirection, TablePress, Simple History, Custom GPO Blocks, GPO Action Blocks, GPO Documents |
+| Carry forward | Secure Custom Fields, The SEO Framework (+ Extension Manager), Redirection, TablePress, Simple History, Custom GPO Blocks, GPO Action Blocks, GPO Documents |
 | Carry forward | Gravity Forms (+ Turnstile, Webhooks) — kept for one-off and admin-facing forms; Qomon handles lead capture, petitions, and campaign forms |
 | Decide | Popup Maker; PublishPress Revisions Pro; TotalContest Pro; Meta pixel; Royal MCP |
 
@@ -47,7 +47,7 @@ All carried plugins ship in the container image via Composer; licensed plugins n
 
 ## Theme
 
-`gpo-web` is a classic custom theme; Canopy's theme direction is Sage, Tailwind, and Meta Box (ADR-005, ADR-011). Options:
+`gpo-web` is a classic custom theme; Canopy's theme direction is Sage and Tailwind (ADR-005, ADR-011), with Secure Custom Fields for custom fields (ADR-014). Options:
 
 1. Port `gpo-web` into the repo as-is and run it unchanged on the network (fastest, keeps two theme stacks alive)
 2. Rebuild gpo.ca on the Canopy theme system (slow, couples migration to a redesign)
