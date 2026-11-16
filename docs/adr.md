@@ -20,6 +20,7 @@
 - [ADR-011 — Sage as the base WordPress theme](#adr-011--sage-as-the-base-wordpress-theme)
 - [ADR-012 — pnpm as the front-end package manager](#adr-012--pnpm-as-the-front-end-package-manager)
 - [ADR-013 — TypeScript as the front-end language standard](#adr-013--typescript-as-the-front-end-language-standard)
+- [ADR-014 — Secure Custom Fields for custom fields](#adr-014--secure-custom-fields-for-custom-fields)
 
 **TBD**
 
@@ -153,7 +154,7 @@ One network to maintain, one deployment pipeline. Operational simplicity outweig
 
 ## ADR-005 — Hybrid theme with Tailwind CSS and Meta Box
 
-**Status:** accepted
+**Status:** accepted; the custom fields layer is superseded by [ADR-014](#adr-014--secure-custom-fields-for-custom-fields)
 **Date:** 2026-05-26
 **Decision makers: Ian Edington and Mark Wong**
 
@@ -354,6 +355,41 @@ TypeScript adds additional safety through types, catching prop-shape and API-mis
 
 - A `tsconfig.json` is required at the theme and blocks-plugin roots; the bundler's built-in TypeScript support is used as-is, no separate compiler step
 - Third-party packages without published types need `@types/*` packages or local ambient declarations
+
+---
+
+## ADR-014 — Secure Custom Fields for custom fields
+
+**Status:** accepted
+**Date:** 2026-11-15
+**Decision makers: Ian Edington and Mark Wong**
+
+### Context and Problem Statement
+
+ADR-005 chose Meta Box for custom fields. Nothing on the network uses it yet. gpo.ca, the first site to move onto Canopy, uses ACF Pro and is replacing it with Secure Custom Fields (gpo/gpo-ca#871) to drop the licence. Running two field frameworks across the network is worse than one. Field types must be defined in code and reviewed in PRs, never configured in wp-admin, and a paid licence is to be avoided.
+
+### Considered Options
+
+- **Secure Custom Fields (SCF)**: WordPress.org's fork of ACF, free, with the former Pro features (repeater, flexible content, options pages, ACF Blocks); same `acf_*` API and storage as ACF
+- **Meta Box**: free core with array definitions; group, conditional logic, settings pages, term meta, and blocks are paid extensions, served as `dev-master` only
+- **ACF Pro**: the same API as SCF, but licensed
+- **Carbon Fields**: free, with a fluent PHP API, but releases are sparse and the issue backlog keeps growing (295 open)
+- **CMB2**: free, array definitions, no block support
+- **Core WordPress (DataForm fields API)**: no third-party dependency, but server-side field registration is still a prototype aimed at WordPress 7.2
+
+### Decision Outcome
+
+**Chosen option: Secure Custom Fields.**
+
+SCF gives every feature Meta Box charges for at no cost, matches gpo.ca so the network runs one framework, and has the strongest code-first tooling: `vinkla/extended-acf` for typed definitions, and `Log1x/acf-composer` for Sage/Acorn. Core's fields API is re-evaluated in Q4 2027 (gpo/gpo-ca#872).
+
+**Consequences:**
+
+- Field groups are registered in code (`acf_add_local_field_group`, or a typed builder on top of it); SCF's admin UI is not used to create field groups, post types, or taxonomies
+- Custom post types and taxonomies are registered with core `register_post_type` and `register_taxonomy`
+- SCF must pass the multisite verification required for every plugin on the stack
+- `Log1x/acf-composer` blocks do not render on SCF until Log1x/acf-composer#367 merges; `vinkla/extended-acf` 15 needs PHP 8.4
+- SCF trails ACF upstream; if it stalls, ACF Pro is a drop-in replacement at the cost of a licence
 
 ---
 
