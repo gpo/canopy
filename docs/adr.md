@@ -20,13 +20,13 @@
 - [ADR-011 — Sage as the base WordPress theme](#adr-011--sage-as-the-base-wordpress-theme)
 - [ADR-012 — pnpm as the front-end package manager](#adr-012--pnpm-as-the-front-end-package-manager)
 - [ADR-013 — TypeScript as the front-end language standard](#adr-013--typescript-as-the-front-end-language-standard)
+- [ADR-014 — Secure Custom Fields for custom fields](#adr-014--secure-custom-fields-for-custom-fields)
 
 **TBD**
 
 - [ADR-008 — GKE Autopilot as the Kubernetes runtime](#adr-008--gke-autopilot-as-the-kubernetes-runtime)
 - [ADR-009 — Stateless pods with GCS media offload](#adr-009--stateless-pods-with-gcs-media-offload)
 - [ADR-010 — GCP IAP for WordPress admin panel access](#adr-010--gcp-iap-for-wordpress-admin-panel-access)
-- [ADR-014 — Secure Custom Fields for custom fields](#adr-014--secure-custom-fields-for-custom-fields)
 
 ---
 
@@ -154,7 +154,7 @@ One network to maintain, one deployment pipeline. Operational simplicity outweig
 
 ## ADR-005 — Hybrid theme with Tailwind CSS and Meta Box
 
-**Status:** accepted; the custom fields layer is superseded by [ADR-014](#adr-014--secure-custom-fields-for-custom-fields) once accepted
+**Status:** accepted; the custom fields layer is superseded by [ADR-014](#adr-014--secure-custom-fields-for-custom-fields)
 **Date:** 2026-05-26
 **Decision makers: Ian Edington and Mark Wong**
 
@@ -360,7 +360,7 @@ TypeScript adds additional safety through types, catching prop-shape and API-mis
 
 ## ADR-014 — Secure Custom Fields for custom fields
 
-**Status:** proposed
+**Status:** accepted
 **Date:** 2026-11-15
 **Decision makers: Ian Edington and Mark Wong**
 
